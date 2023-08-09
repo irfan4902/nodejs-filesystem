@@ -1,39 +1,71 @@
+const WebSocket = require('ws');
+const http = require('http');
 const fs = require('fs');
 const path = require('path');
 
-// Absolute path to folder on the Desktop
 const folderPath = 'C:/Users/irfan.aslam/Desktop/test folder';
 
-fs.readdir(folderPath, (err, files) => {
-    if (err) {
-        console.error('Error reading folder:', err);
-        return;
+const server = http.createServer((req, res) => {
+    const indexHtml = fs.readFileSync('test.html', 'utf8');
+    res.writeHead(200, {'Content-Type': 'text/html'});
+    res.end(indexHtml);
+});
+const wss = new WebSocket.Server({server});
+
+function compare( a, b ) {
+    if ( a.name < b.name ){
+        return -1;
     }
+    if ( a.name > b.name ){
+        return 1;
+    }
+    return 0;
+}
 
-    // console.log("List of all files in", folderPath, ":", files);
-    console.log(`List of all files/folders in ${folderPath}: ${files}`);
+function sendFiles(ws) {
+    var fileData = [];
 
+    fs.readdir(folderPath, (err, files) => {
+        if (err) {
+            console.error('Error reading folder:', err);
+            throw 'Error reading folder:', err;
+        }
 
-    files.forEach(file => {
-        // This is the absolute path of the file/folder
-        const filePath = path.join(folderPath, file);
+        files.forEach(file => {
+            const filePath = path.join(folderPath, file);
 
-        fs.stat(filePath, (err, stats) => {
-            if (err) {
-                console.error('Error getting file stats:', err);
-                return;
-            }
+            fs.stat(filePath, (err, stats) => {
+                if (err) {
+                    console.error('Error getting file stats:', err);
+                    throw 'Error getting file stats: ', err;
+                }
 
-            if (stats.isFile()) {
-                console.log('File:', file);
-            } else if (stats.isDirectory()) {
-                console.log('Folder:', file);
-            }
+                if (stats.isFile()) {
+                    fileData.push({ name: file, type: "File" });
+                } else if (stats.isDirectory()) {
+                    fileData.push({ name: file, type: "Folder" });
+                }
 
-
-
+                // If all files have been processed, send the data to the WebSocket
+                if (fileData.length === files.length) {
+                    ws.send(JSON.stringify(fileData.sort(compare)));
+                }
+            });
         });
 
     });
+}
 
+wss.on('connection', ws => {
+    console.log('Client connected');
+
+    sendFiles(ws);
+
+    ws.on('close', () => {
+        console.log('Client disconnected');
+    });
+});
+
+server.listen(1234, () => {
+    console.log('Server is running on port 1234');
 });

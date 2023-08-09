@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>WebSocket Example</title>
+    <style>
+        table, th, td {
+            border: 1px solid black;
+        }
+    </style>
+    <script>
+        const socket = new WebSocket('ws://localhost:1234');
+        socket.onmessage = event => {
+            document.getElementById('message').textContent = event.data;
+        };
+
+        function addRow(){
+            var table = document.getElementById("file-table");
+            var row = table.insertRow(0);
+            var cell1 = row.insertCell(0);
+            var cell2 = row.insertCell(1);
+            cell1.innerHTML = "NEW CELL1";
+            cell2.innerHTML = "NEW CELL2";
+        }
+
+    </script>
+</head>
+<body onload="addRow()">
+
+<table id="file-table">
+    <tr>
+        <th>Name</th>
+        <th>Type</th>
+    </tr>
+
+</table>
+
+<div id="message"></div>
+
+</body>
+</html>
