@@ -2,7 +2,6 @@ const WebSocket = require('ws');
 const http = require('http');
 const fs = require('fs');
 const path = require('path');
-
 const folderPath = 'C:/Users/irfan.aslam/Desktop/test folder';
 
 const server = http.createServer((req, res) => {
