@@ -5,7 +5,7 @@ const path = require('path');
 const folderPath = 'C:/Users/irfan.aslam/Desktop/test folder';
 
 const server = http.createServer((req, res) => {
-    const indexHtml = fs.readFileSync('test.html', 'utf8');
+    const indexHtml = fs.readFileSync('index.html', 'utf8');
     res.writeHead(200, {'Content-Type': 'text/html'});
     res.end(indexHtml);
 });
@@ -40,9 +40,9 @@ function sendFiles(ws) {
                 }
 
                 if (stats.isFile()) {
-                    fileData.push({ name: file, type: "File" });
+                    fileData.push({ name: file, type: "File" , url: filePath});
                 } else if (stats.isDirectory()) {
-                    fileData.push({ name: file, type: "Folder" });
+                    fileData.push({ name: file, type: "Folder", url: filePath});
                 }
 
                 // If all files have been processed, send the data to the WebSocket
