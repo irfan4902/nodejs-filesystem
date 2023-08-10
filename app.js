@@ -1,15 +1,30 @@
-const WebSocket = require('ws');
-const http = require('http');
 const fs = require('fs');
 const path = require('path');
+const express = require("express");
+const port = 1234;
+const app = express();
+app.use(express.static("public"));
 const folderPath = 'C:/Users/irfan.aslam/Desktop/test folder';
 
-const server = http.createServer((req, res) => {
-    const indexHtml = fs.readFileSync('index.html', 'utf8');
-    res.writeHead(200, {'Content-Type': 'text/html'});
-    res.end(indexHtml);
+// const server = http.createServer((req, res) => {
+//     const indexHtml = fs.readFileSync('index.html', 'utf8');
+//     res.writeHead(200, {'Content-Type': 'text/html'});
+//     res.end(indexHtml);
+// });
+// const wss = new WebSocket.Server({server});
+
+app.get("/info", (req, res) => {
+    res.json("Bruh moment");
 });
-const wss = new WebSocket.Server({server});
+
+app.get("/download-file", (req,res) => {
+
+    console.log(req.query);
+    console.log(Object.entries(req.query));
+    console.log(req.query.filename);
+
+    res.download(folderPath + "/" + req.query.filename);
+});
 
 function compare( a, b ) {
     if ( a.name < b.name ){
@@ -55,16 +70,6 @@ function sendFiles(ws) {
     });
 }
 
-wss.on('connection', ws => {
-    console.log('Client connected');
-
-    sendFiles(ws);
-
-    ws.on('close', () => {
-        console.log('Client disconnected');
-    });
-});
-
-server.listen(1234, () => {
-    console.log('Server is running on port 1234');
+app.listen(port, () => {
+    console.log(`Server started on port ${port}`);
 });
