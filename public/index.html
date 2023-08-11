@@ -12,45 +12,36 @@
 
 <form action="/download-file">
 
-<table id="file-table">
-    <tr>
-        <th>Name</th>
-        <th>Type</th>
-        <th>Action</th>
-    </tr>
-
-</table>
-
-<button type="submit" name="filename" value="test1.txt">Download</button>
+    <table id="file-table">
+        <tr>
+            <th>Name</th>
+            <th>Type</th>
+            <th>Action</th>
+        </tr>
+    </table>
 
 </form>
 
-<button id="bruhBtn">BRUH</button>
-
-<p id="message">hi</p>
-
 <script>
-    const messageElement = document.getElementById('message');
     const baseURL = 'http://localhost:1234/info';
+    window.addEventListener('load', getInfo);
 
-    async function getInfo(e) {
-        e.preventDefault();
-        try {
-            const res = await fetch(baseURL, {
+    async function getInfo() {
+        const res = await fetch(baseURL,
+            {
                 method: 'GET'
             });
-            console.log(res);
-            const data = await res.json();
-            messageElement.textContent = res; // Update the content of the message element
-        } catch (error) {
-            console.error('Error fetching data:', error);
+        console.log(res);
+
+        const data = await res.json();
+        console.log(data);
+
+        for (const item of data) {
+            addRow(item.name, item.type, item.url);
         }
     }
 
-    const bruhBtn = document.getElementById("bruhBtn");
-    bruhBtn.addEventListener('click', getInfo);
-
-    function addRow(name, type, url){
+    function addRow(name, type, url) {
         var table = document.getElementById("file-table");
         var row = table.insertRow(-1);
         var cell1 = row.insertCell(0);
@@ -58,10 +49,10 @@
         var cell3 = row.insertCell(2);
         cell1.innerHTML = name;
         cell2.innerHTML = type;
-        // cell3.innerHTML = url;
-        // cell3.innerHTML = `<a href="${url}" onclick="downloadFile(url, name)">Download</a>`;
-        // cell3.innerHTML = `<a onclick="downloadFile('${url}', '${name}')">Download</a>`;
-        cell3.innerHTML = `<button type="submit" name="filename" value="${name}">Download</button>`
+
+        if (type === "File") {
+            cell3.innerHTML = `<button type="submit" name="filename" value="${name}">Download</button>`;
+        }
     }
 </script>
 </body>

@@ -6,67 +6,84 @@ const app = express();
 app.use(express.static("public"));
 const folderPath = 'C:/Users/irfan.aslam/Desktop/test folder';
 
-// const server = http.createServer((req, res) => {
-//     const indexHtml = fs.readFileSync('index.html', 'utf8');
-//     res.writeHead(200, {'Content-Type': 'text/html'});
-//     res.end(indexHtml);
-// });
-// const wss = new WebSocket.Server({server});
+app.get("/info", (req, res) => {
+    sendFiles(folderPath, (err, fileData) => {
+        if (err) {
+            console.error('Error sending files:', err);
+            res.status(500).send('Internal Server Error');
+        } else {
+            res.status(200).json(fileData);
+        }
+    });
+});
+
+app.get("/download-file", (req, res) => {
+    const filename = req.query.filename;
+    const filePath = path.join(folderPath, filename);
+
+    if (!fs.existsSync(filePath)) {
+        res.status(404).send("File not found");
+        return;
+    }
+    res.download(filePath);
+});
 
 app.get("/info", (req, res) => {
-    res.json("Bruh moment");
+    sendFiles(folderPath, (err, fileData) => {
+        if (err) {
+            console.error('Error sending files:', err);
+            res.status(500).send('Internal Server Error');
+        } else {
+            res.status(200).json(fileData);
+        }
+    });
 });
 
-app.get("/download-file", (req,res) => {
-
-    console.log(req.query);
-    console.log(Object.entries(req.query));
-    console.log(req.query.filename);
-
-    res.download(folderPath + "/" + req.query.filename);
-});
-
-function compare( a, b ) {
-    if ( a.name < b.name ){
+function compare(a, b) {
+    if (a.name < b.name) {
         return -1;
     }
-    if ( a.name > b.name ){
+    if (a.name > b.name) {
         return 1;
     }
     return 0;
 }
 
-function sendFiles(ws) {
+function sendFiles(myPath, callback) {
     var fileData = [];
 
-    fs.readdir(folderPath, (err, files) => {
+    fs.readdir(myPath, (err, files) => {
         if (err) {
             console.error('Error reading folder:', err);
-            throw 'Error reading folder:', err;
+            callback(err, null);
+            return;
         }
 
+        let processedCount = 0;
+
         files.forEach(file => {
-            const filePath = path.join(folderPath, file);
+            const filePath = path.join(myPath, file);
 
             fs.stat(filePath, (err, stats) => {
                 if (err) {
                     console.error('Error getting file stats:', err);
-                    throw 'Error getting file stats: ', err;
+                    callback(err, null);
+                    return;
                 }
 
                 if (stats.isFile()) {
-                    fileData.push({ name: file, type: "File" , url: filePath});
+                    fileData.push({ name: file, type: "File" });
                 } else if (stats.isDirectory()) {
-                    fileData.push({ name: file, type: "Folder", url: filePath});
+                    fileData.push({ name: file, type: "Folder" });
                 }
 
-                // If all files have been processed, send the data to the WebSocket
-                if (fileData.length === files.length) {
-                    ws.send(JSON.stringify(fileData.sort(compare)));
+                processedCount++;
+
+                if (processedCount === files.length) {
+                    callback(null, fileData.sort(compare));
                 }
             });
         });
-
     });
 }
 
