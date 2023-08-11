@@ -1,0 +1,30 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f0f0f0;
+}
+
+h2 {
+    color: #333;
+}
+
+table, th, td {
+    margin: auto;
+    background-color: white;
+    width: 100%;
+    box-shadow: 0px 0px 10px 0px rgba(0,0,0,0.1);
+
+}
+
+table {
+    padding: 5px;
+    border-radius: 5px;
+}
+
+.container {
+    width: 80%;
+    margin: 0 auto;
+    padding: 20px;
+}
+

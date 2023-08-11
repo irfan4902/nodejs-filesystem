@@ -2,25 +2,27 @@
 <html>
 <head>
     <title>Test</title>
-    <style>
-        table, th, td {
-            border: 1px solid black;
-        }
-    </style>
+    <link rel="stylesheet" type="text/css" href="/styles.css">
 </head>
 <body>
 
-<form action="/download-file">
+<div class="container">
 
-    <table id="file-table">
-        <tr>
-            <th>Name</th>
-            <th>Type</th>
-            <th>Action</th>
-        </tr>
-    </table>
+    <h2>File System</h2>
 
-</form>
+    <form action="/download-file">
+
+        <table id="file-table">
+            <tr>
+                <th>Name</th>
+                <th>Type</th>
+                <th>Action</th>
+            </tr>
+        </table>
+
+    </form>
+
+</div>
 
 <script>
     const baseURL = 'http://localhost:1234/info';

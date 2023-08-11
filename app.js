@@ -3,7 +3,8 @@ const path = require('path');
 const express = require("express");
 const port = 1234;
 const app = express();
-app.use(express.static("public"));
+// app.use(express.static("public"));
+app.use(express.static(path.join(__dirname, 'public')));
 const folderPath = 'C:/Users/irfan.aslam/Desktop/test folder';
 
 app.get("/info", (req, res) => {
