@@ -41,6 +41,14 @@ app.get("/info", (req, res) => {
 });
 
 function compare(a, b) {
+    // Folders are sorted above the files
+    if (a.type === "Folder" && b.type !== "Folder") {
+        return -1;
+    }
+    if (a.type !== "Folder" && b.type === "Folder") {
+        return 1;
+    }
+    // Sort them alphabetically
     if (a.name < b.name) {
         return -1;
     }
@@ -49,6 +57,7 @@ function compare(a, b) {
     }
     return 0;
 }
+
 
 function sendFiles(myPath, callback) {
     var fileData = [];
@@ -73,9 +82,9 @@ function sendFiles(myPath, callback) {
                 }
 
                 if (stats.isFile()) {
-                    fileData.push({ name: file, type: "File" });
+                    fileData.push({name: file, type: "File"});
                 } else if (stats.isDirectory()) {
-                    fileData.push({ name: file, type: "Folder" });
+                    fileData.push({name: file, type: "Folder"});
                 }
 
                 processedCount++;
