@@ -3,7 +3,6 @@ const path = require('path');
 const express = require("express");
 const port = 1234;
 const app = express();
-// app.use(express.static("public"));
 app.use(express.static(path.join(__dirname, 'public')));
 const folderPath = 'C:/Users/irfan.aslam/Desktop/test folder';
 
@@ -58,6 +57,12 @@ function compare(a, b) {
     return 0;
 }
 
+function formatFileSize(bytes) {
+    if (bytes < 1024) return bytes + ' B';
+    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(2) + ' KB';
+    if (bytes < 1024 * 1024 * 1024) return (bytes / (1024 * 1024)).toFixed(2) + ' MB';
+    return (bytes / (1024 * 1024 * 1024)).toFixed(2) + ' GB';
+}
 
 function sendFiles(myPath, callback) {
     var fileData = [];
@@ -81,11 +86,14 @@ function sendFiles(myPath, callback) {
                     return;
                 }
 
+                let item = {name: file, date: stats.mtime.toLocaleString(), type: "", size: formatFileSize(stats.size)};
+
                 if (stats.isFile()) {
-                    fileData.push({name: file, type: "File"});
+                    item.type = "File";
                 } else if (stats.isDirectory()) {
-                    fileData.push({name: file, type: "Folder"});
+                    item.type = "Folder";
                 }
+                fileData.push(item);
 
                 processedCount++;
 
