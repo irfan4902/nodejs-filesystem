@@ -4,10 +4,10 @@ const express = require("express");
 const port = 1234;
 const app = express();
 app.use(express.static(path.join(__dirname, 'public')));
-const folderPath = 'C:/Users/irfan.aslam/Desktop/test folder';
+const rootFolder = 'C:/Users/irfan.aslam/Desktop/test folder';
 
 app.get("/info", (req, res) => {
-    sendFiles(folderPath, (err, fileData) => {
+    sendFiles(rootFolder, (err, fileData) => {
         if (err) {
             console.error('Error sending files:', err);
             res.status(500).send('Internal Server Error');
@@ -19,7 +19,7 @@ app.get("/info", (req, res) => {
 
 app.get("/download-file", (req, res) => {
     const filename = req.query.filename;
-    const filePath = path.join(folderPath, filename);
+    const filePath = path.join(rootFolder, filename);
 
     if (!fs.existsSync(filePath)) {
         res.status(404).send("File not found");
@@ -29,6 +29,9 @@ app.get("/download-file", (req, res) => {
 });
 
 app.get("/info", (req, res) => {
+    const url = req.query.url;
+    const folderPath = path.join(rootFolder, url);
+    // sendFiles(rootFolder, (err, fileData) => {
     sendFiles(folderPath, (err, fileData) => {
         if (err) {
             console.error('Error sending files:', err);
@@ -38,31 +41,6 @@ app.get("/info", (req, res) => {
         }
     });
 });
-
-function compare(a, b) {
-    // Folders are sorted above the files
-    if (a.type === "Folder" && b.type !== "Folder") {
-        return -1;
-    }
-    if (a.type !== "Folder" && b.type === "Folder") {
-        return 1;
-    }
-    // Sort them alphabetically
-    if (a.name < b.name) {
-        return -1;
-    }
-    if (a.name > b.name) {
-        return 1;
-    }
-    return 0;
-}
-
-function formatFileSize(bytes) {
-    if (bytes < 1024) return bytes + ' B';
-    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(2) + ' KB';
-    if (bytes < 1024 * 1024 * 1024) return (bytes / (1024 * 1024)).toFixed(2) + ' MB';
-    return (bytes / (1024 * 1024 * 1024)).toFixed(2) + ' GB';
-}
 
 function sendFiles(myPath, callback) {
     var fileData = [];
@@ -103,6 +81,31 @@ function sendFiles(myPath, callback) {
             });
         });
     });
+}
+
+function compare(a, b) {
+    // Folders are sorted above the files
+    if (a.type === "Folder" && b.type !== "Folder") {
+        return -1;
+    }
+    if (a.type !== "Folder" && b.type === "Folder") {
+        return 1;
+    }
+    // Sort them alphabetically
+    if (a.name < b.name) {
+        return -1;
+    }
+    if (a.name > b.name) {
+        return 1;
+    }
+    return 0;
+}
+
+function formatFileSize(bytes) {
+    if (bytes < 1024) return bytes + ' B';
+    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(2) + ' KB';
+    if (bytes < 1024 * 1024 * 1024) return (bytes / (1024 * 1024)).toFixed(2) + ' MB';
+    return (bytes / (1024 * 1024 * 1024)).toFixed(2) + ' GB';
 }
 
 app.listen(port, () => {
