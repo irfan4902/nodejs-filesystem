@@ -4,6 +4,7 @@ const express = require("express");
 const port = 1234;
 const app = express();
 app.use(express.static(path.join(__dirname, 'public')));
+// Address of root folder to display files from:
 const rootFolder = 'C:/Users/irfan.aslam/Desktop/test folder';
 
 app.get("/info", (req, res) => {
@@ -17,7 +18,21 @@ app.get("/info", (req, res) => {
     });
 });
 
-app.get("/download-file", (req, res) => {
+app.get("/info2", (req, res) => {
+    // const url = req.query.url;
+    // const folderPath = path.join(rootFolder, url);
+    // sendFiles(folderPath, (err, fileData) => {
+    sendFiles('C:/Users/irfan.aslam/Desktop/test folder/another random folder', (err, fileData) => {
+        if (err) {
+            console.error('Error sending files:', err);
+            res.status(500).send('Internal Server Error');
+        } else {
+            res.status(200).json(fileData);
+        }
+    });
+});
+
+app.get("/download", (req, res) => {
     const filename = req.query.filename;
     const filePath = path.join(rootFolder, filename);
 
@@ -26,20 +41,6 @@ app.get("/download-file", (req, res) => {
         return;
     }
     res.download(filePath);
-});
-
-app.get("/info", (req, res) => {
-    const url = req.query.url;
-    const folderPath = path.join(rootFolder, url);
-    // sendFiles(rootFolder, (err, fileData) => {
-    sendFiles(folderPath, (err, fileData) => {
-        if (err) {
-            console.error('Error sending files:', err);
-            res.status(500).send('Internal Server Error');
-        } else {
-            res.status(200).json(fileData);
-        }
-    });
 });
 
 function sendFiles(myPath, callback) {

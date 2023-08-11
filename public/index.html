@@ -10,7 +10,7 @@
 
     <h2>File System</h2>
 
-    <form action="/download-file">
+    <form action="/download">
 
         <table id="file-table">
             <tr>
@@ -29,9 +29,8 @@
 
 <script>
     // Once the webpage loads, do the getInfo function
-    window.addEventListener('load', getInfo);
     const baseURL = 'http://localhost:1234/info';
-
+    window.addEventListener('load', getInfo());
     async function getInfo() {
         const res = await fetch(baseURL,
             {
@@ -58,7 +57,8 @@
         let cell6 = row.insertCell(5); // Action
         cell1.innerHTML = `<input type="checkbox">`
         if (type === "Folder") {
-            cell2.innerHTML = `<a href="#">${name}</a>`
+            cell2.innerHTML = `<a onclick="getInfo()">${name}</a>`
+            // cell2.innerHTML = `<a href="/info">${name}</a>`
         } else {
             cell2.innerHTML = name;
         }
