@@ -5,7 +5,7 @@ const port = 1234;
 const app = express();
 app.use(express.static(path.join(__dirname, 'public')));
 // Address of root folder to display files from:
-const rootURL = 'C:/Users/irfan.aslam/Desktop/test folder';
+const rootURL = 'C:\\Users\\irfan.aslam\\Desktop\\test folder';
 let currentURL = rootURL;
 
 app.get("/info", (req, res) => {
@@ -21,9 +21,10 @@ app.get("/info", (req, res) => {
 
 app.get("/info2", (req, res) => {
     const url = req.query.url;
-    const folderPath = path.join(rootURL, url);
+    const folderPath = path.join(currentURL, url);
     currentURL = folderPath;
-    // sendFiles('C:/Users/irfan.aslam/Desktop/test folder/another random folder', (err, fileData) => {
+    console.log("Current URL:", currentURL);
+    console.log("Root URL:", rootURL);
     sendFiles(folderPath, (err, fileData) => {
         if (err) {
             console.error('Error sending files:', err);
@@ -65,6 +66,10 @@ function sendFiles(myPath, callback) {
                     console.error('Error getting file stats:', err);
                     callback(err, null);
                     return;
+                }
+
+                if (fileData.length < 1 && currentURL !== rootURL) {
+                    fileData.push({name: "..", date: "", type: "Folder", size: ""});
                 }
 
                 let item = {name: file, date: stats.mtime.toLocaleString(), type: "", size: formatFileSize(stats.size)};
