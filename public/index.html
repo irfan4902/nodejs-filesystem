@@ -53,9 +53,8 @@
 
     async function changeDir(folderName) {
         clearTable();
+        addRow('..', '', 'Folder','');
 
-        // let newURL = `${baseURL}/${folderName}`;
-        // let newURL = 'http://localhost:1234/info2';
         let newURL = `http://localhost:1234/info2?url=${folderName}`;
 
         const res = await fetch(newURL,
@@ -76,7 +75,7 @@
         document.getElementById('file-table-body').innerHTML = '';
     }
 
-    function addRow(name, date, type, size) {
+    function addRow(name, date, type, size, url) {
         let table = document.getElementById("file-table-body");
         let row = table.insertRow(-1);
         let cell1 = row.insertCell(0); // Checkbox

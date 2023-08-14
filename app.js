@@ -5,10 +5,11 @@ const port = 1234;
 const app = express();
 app.use(express.static(path.join(__dirname, 'public')));
 // Address of root folder to display files from:
-const rootFolder = 'C:/Users/irfan.aslam/Desktop/test folder';
+const rootURL = 'C:/Users/irfan.aslam/Desktop/test folder';
+let currentURL = rootURL;
 
 app.get("/info", (req, res) => {
-    sendFiles(rootFolder, (err, fileData) => {
+    sendFiles(rootURL, (err, fileData) => {
         if (err) {
             console.error('Error sending files:', err);
             res.status(500).send('Internal Server Error');
@@ -20,7 +21,8 @@ app.get("/info", (req, res) => {
 
 app.get("/info2", (req, res) => {
     const url = req.query.url;
-    const folderPath = path.join(rootFolder, url);
+    const folderPath = path.join(rootURL, url);
+    currentURL = folderPath;
     // sendFiles('C:/Users/irfan.aslam/Desktop/test folder/another random folder', (err, fileData) => {
     sendFiles(folderPath, (err, fileData) => {
         if (err) {
@@ -34,7 +36,7 @@ app.get("/info2", (req, res) => {
 
 app.get("/download", (req, res) => {
     const filename = req.query.filename;
-    const filePath = path.join(rootFolder, filename);
+    const filePath = path.join(currentURL, filename);
 
     if (!fs.existsSync(filePath)) {
         res.status(404).send("File not found");
