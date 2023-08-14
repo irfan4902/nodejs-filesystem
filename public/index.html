@@ -52,8 +52,13 @@
     }
 
     async function changeDir(folderName) {
-        let newURL = `${baseURL}/${folderName}`;
-        const res = await fetch(baseURL,
+        clearTable();
+
+        // let newURL = `${baseURL}/${folderName}`;
+        // let newURL = 'http://localhost:1234/info2';
+        let newURL = `http://localhost:1234/info2?url=${folderName}`;
+
+        const res = await fetch(newURL,
             {
                 method: 'GET'
             });
@@ -82,7 +87,7 @@
         let cell6 = row.insertCell(5); // Action
         cell1.innerHTML = `<input type="checkbox">`
         if (type === "Folder") {
-            cell2.innerHTML = `<a onclick="clearTable()">${name}</a>`
+            cell2.innerHTML = `<a onclick="changeDir('${name}')">${name}</a>`
             // cell2.innerHTML = `<a href="/info">${name}</a>`
         } else {
             cell2.innerHTML = name;

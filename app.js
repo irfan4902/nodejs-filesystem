@@ -19,10 +19,10 @@ app.get("/info", (req, res) => {
 });
 
 app.get("/info2", (req, res) => {
-    // const url = req.query.url;
-    // const folderPath = path.join(rootFolder, url);
-    // sendFiles(folderPath, (err, fileData) => {
-    sendFiles('C:/Users/irfan.aslam/Desktop/test folder/another random folder', (err, fileData) => {
+    const url = req.query.url;
+    const folderPath = path.join(rootFolder, url);
+    // sendFiles('C:/Users/irfan.aslam/Desktop/test folder/another random folder', (err, fileData) => {
+    sendFiles(folderPath, (err, fileData) => {
         if (err) {
             console.error('Error sending files:', err);
             res.status(500).send('Internal Server Error');
