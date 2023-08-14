@@ -1,6 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 const express = require("express");
+const JSZip = require('jszip');
 const port = 1234;
 const app = express();
 app.use(express.static(path.join(__dirname, 'public')));
@@ -36,14 +37,31 @@ app.get("/info2", (req, res) => {
 });
 
 app.get("/download", (req, res) => {
-    const filename = req.query.filename;
-    const filePath = path.join(currentURL, filename);
+    const fileName = req.query.filename;
+    const filePath = path.join(currentURL, fileName);
 
     if (!fs.existsSync(filePath)) {
         res.status(404).send("File not found");
         return;
     }
     res.download(filePath);
+});
+
+app.get("/zip", async (req, res) => {
+    const zip = new JSZip();
+    const fileList = req.query.files.split(',');
+
+    for (const file of fileList) {
+        const filePath = path.join(currentURL, file);
+        const fileData = await fs.promises.readFile(filePath);
+        zip.file(file, fileData);
+    }
+
+    const content = await zip.generateAsync({ type: 'nodebuffer' });
+
+    console.log(fileList);
+    res.attachment('bpmb-files.zip');
+    res.send(content);
 });
 
 function sendFiles(myPath, callback) {
@@ -84,7 +102,7 @@ function sendFiles(myPath, callback) {
                 processedCount++;
 
                 if (processedCount === files.length) {
-                    fileData.push({"bruh": currentURL});
+                    fileData.push({"path": currentURL});
                     callback(null, fileData.sort(compare));
                 }
             });

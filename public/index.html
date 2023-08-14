@@ -31,6 +31,8 @@
 
     </table>
 
+    <button onclick="getSelectedItems()">Download selected items as .zip</button>
+
 </div>
 
 <script>
@@ -52,7 +54,7 @@
             addRow(item.name, item.date, item.type, item.size);
         }
 
-        document.getElementById("breadcrumb").textContent = data.at(-1).bruh;
+        document.getElementById("breadcrumb").textContent = data.at(-1).path;
     }
 
     async function changeDir(folderName) {
@@ -73,14 +75,14 @@
             addRow(item.name, item.date, item.type, item.size);
         }
 
-        document.getElementById("breadcrumb").textContent = data.at(-1).bruh;
+        document.getElementById("breadcrumb").textContent = data.at(-1).path;
     }
 
     function clearTable() {
         document.getElementById('file-table-body').innerHTML = '';
     }
 
-    function addRow(name, date, type, size, url) {
+    function addRow(name, date, type, size) {
         let table = document.getElementById("file-table-body");
         let row = table.insertRow(-1);
         let cell1 = row.insertCell(0); // Checkbox
@@ -89,18 +91,39 @@
         let cell4 = row.insertCell(3); // Type
         let cell5 = row.insertCell(4); // Size
         let cell6 = row.insertCell(5); // Action
-        cell1.innerHTML = `<input type="checkbox">`
+
+        if (name != '..') {
+            cell1.innerHTML = `<input type="checkbox" value="${name}">`
+        }
+
         if (type === "Folder") {
             cell2.innerHTML = `<a href="#" onclick="changeDir('${name}')">${name}</a>`
         } else {
             cell2.innerHTML = name;
         }
+
         cell3.innerHTML = date;
         cell4.innerHTML = type;
+
         if (type === "File") {
             cell5.innerHTML = size;
             cell6.innerHTML = `<button onclick="window.location.href='/download?filename=${name}'">Download</button>`;
         }
+    }
+
+    function getSelectedItems() {
+        const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+        const selectedItems = [];
+
+        checkboxes.forEach(checkbox => {
+            if (checkbox.checked) {
+                selectedItems.push(checkbox.value);
+            }
+        });
+
+        console.log(selectedItems);
+
+        window.location.href=`/zip?files=${selectedItems.toString()}`;
     }
 </script>
 </body>
