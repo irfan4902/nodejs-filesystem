@@ -84,6 +84,7 @@ function sendFiles(myPath, callback) {
                 processedCount++;
 
                 if (processedCount === files.length) {
+                    fileData.push({"bruh": currentURL});
                     callback(null, fileData.sort(compare));
                 }
             });

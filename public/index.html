@@ -10,6 +10,8 @@
 
     <h2>File System</h2>
 
+    <p id="breadcrumb"></p>
+
     <table id="file-table">
 
         <thead>
@@ -46,9 +48,11 @@
         const data = await res.json();
         console.log(data);
 
-        for (const item of data) {
+        for (const item of (data.slice(0, -1))) {
             addRow(item.name, item.date, item.type, item.size);
         }
+
+        document.getElementById("breadcrumb").textContent = data.at(-1).bruh;
     }
 
     async function changeDir(folderName) {
@@ -65,9 +69,11 @@
         const data = await res.json();
         console.log(data);
 
-        for (const item of data) {
+        for (const item of (data.slice(0, -1))) {
             addRow(item.name, item.date, item.type, item.size);
         }
+
+        document.getElementById("breadcrumb").textContent = data.at(-1).bruh;
     }
 
     function clearTable() {
