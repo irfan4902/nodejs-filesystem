@@ -10,20 +10,24 @@
 
     <h2>File System</h2>
 
-    <form action="/download">
+    <table id="file-table">
 
-        <table id="file-table">
-            <tr>
-                <th></th>
-                <th style="width:50%;">Name</th>
-                <th style="width:25%">Date Modified</th>
-                <th>Type</th>
-                <th>Size</th>
-                <th>Action</th>
-            </tr>
-        </table>
+        <thead>
+        <tr>
+            <th></th>
+            <th style="width:50%;">Name</th>
+            <th style="width:25%">Date Modified</th>
+            <th>Type</th>
+            <th>Size</th>
+            <th>Action</th>
+        </tr>
+        </thead>
 
-    </form>
+        <tbody id="file-table-body">
+
+        </tbody>
+
+    </table>
 
 </div>
 
@@ -31,6 +35,7 @@
     // Once the webpage loads, do the getInfo function
     const baseURL = 'http://localhost:1234/info';
     window.addEventListener('load', getInfo());
+
     async function getInfo() {
         const res = await fetch(baseURL,
             {
@@ -46,10 +51,30 @@
         }
     }
 
+    async function changeDir(folderName) {
+        let newURL = `${baseURL}/${folderName}`;
+        const res = await fetch(baseURL,
+            {
+                method: 'GET'
+            });
+        console.log(res);
+
+        const data = await res.json();
+        console.log(data);
+
+        for (const item of data) {
+            addRow(item.name, item.date, item.type, item.size);
+        }
+    }
+
+    function clearTable() {
+        document.getElementById('file-table-body').innerHTML = '';
+    }
+
     function addRow(name, date, type, size) {
-        let table = document.getElementById("file-table");
+        let table = document.getElementById("file-table-body");
         let row = table.insertRow(-1);
-        let cell1 = row.insertCell(0); // Name
+        let cell1 = row.insertCell(0); // Checkbox
         let cell2 = row.insertCell(1); // Name
         let cell3 = row.insertCell(2); // Date
         let cell4 = row.insertCell(3); // Type
@@ -57,7 +82,7 @@
         let cell6 = row.insertCell(5); // Action
         cell1.innerHTML = `<input type="checkbox">`
         if (type === "Folder") {
-            cell2.innerHTML = `<a onclick="getInfo()">${name}</a>`
+            cell2.innerHTML = `<a onclick="clearTable()">${name}</a>`
             // cell2.innerHTML = `<a href="/info">${name}</a>`
         } else {
             cell2.innerHTML = name;
@@ -66,7 +91,7 @@
         cell4.innerHTML = type;
         if (type === "File") {
             cell5.innerHTML = size;
-            cell6.innerHTML = `<button type="submit" name="filename" value="${name}">Download</button>`;
+            cell6.innerHTML = `<button onclick="window.location.href='/download?filename=${name}'">Download</button>`;
         }
     }
 </script>
