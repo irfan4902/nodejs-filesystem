@@ -5,11 +5,14 @@ const archiver = require('archiver');
 const port = 1234;
 const app = express();
 app.use(express.static(path.join(__dirname, 'public')));
+
 // Address of root folder to display files from:
 const rootURL = 'C:\\Users\\irfan.aslam\\Desktop\\test folder';
 let currentURL = rootURL;
 
-app.get("/info", (req, res) => {
+app.get("/home", (req, res) => {
+    currentURL = rootURL;
+    console.log("Current URL:", currentURL);
     sendFiles(rootURL, (err, fileData) => {
         if (err) {
             console.error('Error sending files:', err);
@@ -36,20 +39,6 @@ app.get("/info2", (req, res) => {
     });
 });
 
-app.get("/home", (req, res) => {
-    currentURL = rootURL;
-    console.log("Current URL:", currentURL);
-    console.log("Root URL:", rootURL);
-    sendFiles(rootURL, (err, fileData) => {
-        if (err) {
-            console.error('Error sending files:', err);
-            res.status(500).send('Internal Server Error');
-        } else {
-            res.status(200).json(fileData);
-        }
-    });
-});
-
 app.get("/download", (req, res) => {
     const fileName = req.query.filename;
     const filePath = path.join(currentURL, fileName);
@@ -58,6 +47,8 @@ app.get("/download", (req, res) => {
         res.status(404).send("File not found");
         return;
     }
+
+    console.log(`Downloading file: ${fileName}`);
     res.download(filePath);
 });
 
@@ -69,16 +60,14 @@ app.get("/zip", async (req, res) => {
         zlib: { level: 9 } // Set the compression level
     });
 
-    res.attachment('bruh.zip');
+    console.log(`Downloading files as zip: ${fileList}`);
+    res.attachment('bpmb-files.zip');
     zip.pipe(res);
-
     await addStuffToZip(zip, fileList);
-
-    zip.finalize();
+    await zip.finalize();
 });
 
 async function addStuffToZip(zip, listOfItems) {
-    console.log("bruh moment");
     for (const itemName of listOfItems) {
         const itemPath = path.join(currentURL, itemName);
         console.log(itemPath);
@@ -87,37 +76,13 @@ async function addStuffToZip(zip, listOfItems) {
             const stats = await fs.promises.stat(itemPath);
 
             if (stats.isFile()) {
-                console.log(`The path points to a file: ${itemName}`);
-                const readableStream = fs.createReadStream(itemPath);
-                zip.append(readableStream, { name: itemName });
+                console.log(`Adding file ${itemName} to archive.`);
+                zip.append(fs.createReadStream(itemPath), { name: itemName });
             } else if (stats.isDirectory()) {
-                console.log(`The path points to a directory: ${itemName}`);
-                await addDirectoryToZip(zip, itemPath, itemName);
+                console.log(`Adding folder ${itemName} to archive.`);
+                zip.directory(itemPath, itemName);
             } else {
-                console.log(`The path is neither a file nor a directory: ${itemName}`);
-            }
-        } catch (err) {
-            console.error('Error:', err);
-        }
-    }
-}
-
-async function addDirectoryToZip(zip, dirPath, baseName) {
-    const items = await fs.promises.readdir(dirPath);
-
-    for (const item of items) {
-        const itemPath = path.join(dirPath, item);
-
-        try {
-            const stats = await fs.promises.stat(itemPath);
-
-            if (stats.isFile()) {
-                console.log(`Adding file to archive: ${item}`);
-                const readableStream = fs.createReadStream(itemPath);
-                zip.append(readableStream, { name: path.join(baseName, item) });
-            } else if (stats.isDirectory()) {
-                console.log(`Recursing into directory: ${item}`);
-                await addDirectoryToZip(zip, itemPath, path.join(baseName, item));
+                console.error(`Error: Path is neither a file nor a directory: ${itemName}`);
             }
         } catch (err) {
             console.error('Error:', err);
@@ -126,7 +91,7 @@ async function addDirectoryToZip(zip, dirPath, baseName) {
 }
 
 function sendFiles(myPath, callback) {
-    var fileData = [];
+    const fileData = [];
 
     fs.readdir(myPath, (err, files) => {
         if (err) {

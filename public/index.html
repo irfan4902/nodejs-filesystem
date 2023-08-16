@@ -1,7 +1,7 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Test</title>
+    <title>BPMB File System</title>
     <link rel="stylesheet" type="text/css" href="/styles.css">
 </head>
 <body>
@@ -33,17 +33,18 @@
 
     </table>
 
-    <button onclick="getSelectedItems()">Download selected items as .zip</button>
+    <button onclick="zipItems()">Download selected items as .zip</button>
 
 </div>
 
 <script>
-    // Once the webpage loads, do the getInfo function
-    const baseURL = 'http://localhost:1234/info';
-    window.addEventListener('load', getInfo());
+    // Once the webpage loads, call the goHome function
+    window.addEventListener('load', goHome);
 
-    async function getInfo() {
-        const res = await fetch(baseURL,
+    async function goHome() {
+        clearTable();
+
+        const res = await fetch(`http://localhost:1234/home`,
             {
                 method: 'GET'
             });
@@ -62,9 +63,7 @@
     async function changeDir(folderName) {
         clearTable();
 
-        let newURL = `http://localhost:1234/info2?url=${folderName}`;
-
-        const res = await fetch(newURL,
+        const res = await fetch(`http://localhost:1234/info2?url=${folderName}`,
             {
                 method: 'GET'
             });
@@ -80,31 +79,25 @@
         document.getElementById("breadcrumb").textContent = data.at(-1).path;
     }
 
-    async function goHome() {
-        clearTable();
-        let newURL = `http://localhost:1234/home`;
+    function zipItems() {
+        const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+        const selectedItems = [];
 
-        const res = await fetch(newURL,
-            {
-                method: 'GET'
-            });
-        console.log(res);
+        checkboxes.forEach(checkbox => {
+            if (checkbox.checked) {
+                selectedItems.push(checkbox.value);
+            }
+        });
+        console.log(selectedItems);
 
-        const data = await res.json();
-        console.log(data);
-
-        for (const item of (data.slice(0, -1))) {
-            addRow(item.name, item.date, item.type, item.size);
-        }
-
-        document.getElementById("breadcrumb").textContent = data.at(-1).path;
+        window.location.href=`/zip?files=${selectedItems.toString()}`;
     }
 
     function clearTable() {
         document.getElementById('file-table-body').innerHTML = '';
     }
 
-    function addRow(name, date, type, size) {
+    function addRow(name, date, type, size, url) {
         let table = document.getElementById("file-table-body");
         let row = table.insertRow(-1);
         let cell1 = row.insertCell(0); // Checkbox
@@ -114,7 +107,7 @@
         let cell5 = row.insertCell(4); // Size
         let cell6 = row.insertCell(5); // Action
 
-        if (name != '..') {
+        if (name !== '..') {
             cell1.innerHTML = `<input type="checkbox" value="${name}">`
         }
 
@@ -131,21 +124,6 @@
             cell5.innerHTML = size;
             cell6.innerHTML = `<button onclick="window.location.href='/download?filename=${name}'">Download</button>`;
         }
-    }
-
-    function getSelectedItems() {
-        const checkboxes = document.querySelectorAll('input[type="checkbox"]');
-        const selectedItems = [];
-
-        checkboxes.forEach(checkbox => {
-            if (checkbox.checked) {
-                selectedItems.push(checkbox.value);
-            }
-        });
-
-        console.log(selectedItems);
-
-        window.location.href=`/zip?files=${selectedItems.toString()}`;
     }
 </script>
 </body>
