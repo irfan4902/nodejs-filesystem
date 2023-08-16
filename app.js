@@ -36,6 +36,20 @@ app.get("/info2", (req, res) => {
     });
 });
 
+app.get("/home", (req, res) => {
+    currentURL = rootURL;
+    console.log("Current URL:", currentURL);
+    console.log("Root URL:", rootURL);
+    sendFiles(rootURL, (err, fileData) => {
+        if (err) {
+            console.error('Error sending files:', err);
+            res.status(500).send('Internal Server Error');
+        } else {
+            res.status(200).json(fileData);
+        }
+    });
+});
+
 app.get("/download", (req, res) => {
     const fileName = req.query.filename;
     const filePath = path.join(currentURL, fileName);

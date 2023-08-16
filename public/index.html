@@ -10,6 +10,8 @@
 
     <h2>File System</h2>
 
+    <a href="#" onclick="goHome()">Home</a>
+
     <p id="breadcrumb"></p>
 
     <table id="file-table">
@@ -61,6 +63,26 @@
         clearTable();
 
         let newURL = `http://localhost:1234/info2?url=${folderName}`;
+
+        const res = await fetch(newURL,
+            {
+                method: 'GET'
+            });
+        console.log(res);
+
+        const data = await res.json();
+        console.log(data);
+
+        for (const item of (data.slice(0, -1))) {
+            addRow(item.name, item.date, item.type, item.size);
+        }
+
+        document.getElementById("breadcrumb").textContent = data.at(-1).path;
+    }
+
+    async function goHome() {
+        clearTable();
+        let newURL = `http://localhost:1234/home`;
 
         const res = await fetch(newURL,
             {
