@@ -40,11 +40,12 @@
 <script>
     // Once the webpage loads, call the goHome function
     window.addEventListener('load', goHome);
+    const baseURL = 'http://localhost:1234';
 
     async function goHome() {
         clearTable();
 
-        const res = await fetch(`http://localhost:1234/home`,
+        const res = await fetch(baseURL + '/home',
             {
                 method: 'GET'
             });
@@ -54,16 +55,17 @@
         console.log(data);
 
         for (const item of (data.slice(0, -1))) {
-            addRow(item.name, item.date, item.type, item.size);
+            addRow(item.name, item.date, item.type, item.size, item.url);
         }
 
         document.getElementById("breadcrumb").textContent = data.at(-1).path;
     }
 
     async function changeDir(folderName) {
+        console.log(folderName);
         clearTable();
 
-        const res = await fetch(`http://localhost:1234/info2?url=${folderName}`,
+        const res = await fetch(baseURL + `/info2?url=${folderName}`,
             {
                 method: 'GET'
             });
@@ -73,10 +75,10 @@
         console.log(data);
 
         for (const item of (data.slice(0, -1))) {
-            addRow(item.name, item.date, item.type, item.size);
+            addRow(item.name, item.date, item.type, item.size, item.url);
         }
 
-        document.getElementById("breadcrumb").textContent = data.at(-1).path;
+        document.getElementById("breadcrumb").textContent = folderName;
     }
 
     function zipItems() {
@@ -112,7 +114,8 @@
         }
 
         if (type === "Folder") {
-            cell2.innerHTML = `<a href="#" onclick="changeDir('${name}')">${name}</a>`
+            let newURL = url.replace(/\\/g, '/');
+            cell2.innerHTML = `<a href="#" onclick="changeDir('${newURL}')">${name}</a>`
         } else {
             cell2.innerHTML = name;
         }
