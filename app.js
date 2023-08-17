@@ -1,18 +1,21 @@
 const fs = require('fs');
 const path = require('path');
+const url = require("url");
 const express = require("express");
 const archiver = require('archiver');
-const port = 1234;
 const app = express();
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Address of root folder to display files from:
-const rootURL = 'C:/Users/irfan.aslam/Desktop/test folder';
-let currentURL = rootURL;
+// Port number
+const port = 1234;
+// Address of the root directory of the file system
+const rootPath = "C:/Users/irfan.aslam/Desktop/test folder";
+// Name of the root directory in the client (displayed on the breadcrumbs)
+const homeName = "NLF File System";
 
 app.get("/home", (req, res) => {
-    console.log("Current URL:", rootURL);
-    sendFiles(rootURL, (err, fileData) => {
+    console.log("Current URL:", rootPath);
+    sendFiles(rootPath, (err, fileData) => {
         if (err) {
             console.error('Error sending files:', err);
             res.status(500).send('Internal Server Error');
@@ -22,9 +25,13 @@ app.get("/home", (req, res) => {
     });
 });
 
-app.get("/info2", (req, res) => {
+app.get("/dir", (req, res) => {
     const url = req.query.url;
-    sendFiles(url, (err, fileData) => {
+
+    let newUrl = url.replace(homeName, rootPath);
+    console.log("Changing directory to:", newUrl);
+
+    sendFiles(newUrl, (err, fileData) => {
         if (err) {
             console.error('Error sending files:', err);
             res.status(500).send('Internal Server Error');
@@ -35,60 +42,36 @@ app.get("/info2", (req, res) => {
 });
 
 app.get("/download", (req, res) => {
-    const fileName = req.query.filename;
-    const filePath = path.join(currentURL, fileName);
+    const filePath = req.query.filepath;
+    const newPath = filePath.replace(homeName, rootPath);
 
-    if (!fs.existsSync(filePath)) {
+    if (!fs.existsSync(newPath)) {
         res.status(404).send("File not found");
         return;
     }
 
-    console.log(`Downloading file: ${fileName}`);
-    res.download(filePath);
+    console.log(`Downloading file: ${newPath}`);
+    res.download(newPath);
 });
 
 app.get("/zip", async (req, res) => {
-    const fileList = req.query.files.split(',');
+    let fileList = req.query.files.split(',');
+    console.log("Downloading files as zip:");
     console.log(fileList);
 
-    const zip = archiver('zip', {
-        zlib: {level: 9} // Set the compression level
-    });
-
-    console.log(`Downloading files as zip: ${fileList}`);
-    res.attachment('bpmb-files.zip');
-    zip.pipe(res);
+    const zip = archiver('zip', {zlib: {level: 9}});  // Set the compression level
     await addStuffToZip(zip, fileList);
     await zip.finalize();
+    zip.pipe(res);
+    res.attachment('NLF-Files.zip');
 });
 
-async function addStuffToZip(zip, listOfItems) {
-    for (const itemName of listOfItems) {
-        const itemPath = path.join(currentURL, itemName);
-        console.log(itemPath);
-
-        try {
-            const stats = await fs.promises.stat(itemPath);
-
-            if (stats.isFile()) {
-                console.log(`Adding file ${itemName} to archive.`);
-                zip.append(fs.createReadStream(itemPath), {name: itemName});
-            } else if (stats.isDirectory()) {
-                console.log(`Adding folder ${itemName} to archive.`);
-                zip.directory(itemPath, itemName);
-            } else {
-                console.error(`Error: Path is neither a file nor a directory: ${itemName}`);
-            }
-        } catch (err) {
-            console.error('Error:', err);
-        }
-    }
-}
-
-function sendFiles(myPath, callback) {
+function sendFiles(directory, callback) {
     const fileData = [];
 
-    fs.readdir(myPath, (err, files) => {
+    console.log("Current Directory:", directory);
+
+    fs.readdir(directory, (err, items) => {
         if (err) {
             console.error('Error reading folder:', err);
             callback(err, null);
@@ -97,9 +80,8 @@ function sendFiles(myPath, callback) {
 
         let processedCount = 0;
 
-        files.forEach(file => {
-            const filePath = path.join(myPath, file);
-            console.log(filePath);
+        items.forEach(itemName => {
+            const filePath = path.join(directory, itemName);
 
             fs.stat(filePath, (err, stats) => {
                 if (err) {
@@ -109,19 +91,26 @@ function sendFiles(myPath, callback) {
                 }
 
                 // Remove the last directory
-                const pathParts = myPath.split('/');
+                const pathParts = directory.split('/');
                 const newPath = pathParts.slice(0, -1).join('/');
+
                 // Add the .. item at the top of the table
-                if (fileData.length < 1 && myPath != rootURL) {
-                    fileData.push({name: "..", date: "", type: "Folder", size: "", url: newPath});
+                if (fileData.length < 1 && directory != rootPath) {
+                    fileData.push({
+                        name: "..",
+                        date: "",
+                        type: "Folder",
+                        size: "",
+                        url: newPath.replace(rootPath, homeName)
+                    });
                 }
 
                 let item = {
-                    name: file,
+                    name: itemName,
                     date: stats.mtime.toLocaleString(),
                     type: "",
                     size: formatFileSize(stats.size),
-                    url: filePath
+                    url: filePath.replaceAll('\\', '/').replace(rootPath, homeName)
                 };
 
                 if (stats.isFile()) {
@@ -133,9 +122,7 @@ function sendFiles(myPath, callback) {
 
                 processedCount++;
 
-                // Add currentURL to the end of the JSON response
-                if (processedCount === files.length) {
-                    fileData.push({"path": currentURL});
+                if (processedCount === items.length) {
                     callback(null, fileData.sort(compare));
                 }
             });
@@ -143,6 +130,32 @@ function sendFiles(myPath, callback) {
     });
 }
 
+async function addStuffToZip(zip, listOfItems) {
+    for (let item of listOfItems) {
+        let itemName = path.basename(item);
+        let itemPath = item.replace(homeName, rootPath);
+
+        try {
+            const stats = await fs.promises.stat(itemPath);
+
+            if (stats.isFile()) {
+                console.log(`Adding file ${itemName} to archive.`);
+                zip.append(fs.createReadStream(itemPath), {name: itemName});
+            }
+            else if (stats.isDirectory()) {
+                console.log(`Adding folder ${itemName} to archive.`);
+                zip.directory(itemPath, itemName);
+            }
+            else {
+                console.error(`Error: Path is neither a file nor a directory: ${itemName}`);
+            }
+        } catch (err) {
+            console.error('Error:', err);
+        }
+    }
+}
+
+// Comparison function to sort items based on name and type
 function compare(a, b) {
     // Folders are sorted above the files
     if (a.type === "Folder" && b.type !== "Folder") {

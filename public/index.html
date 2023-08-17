@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <title>BPMB File System</title>
+    <title>File System</title>
     <link rel="stylesheet" type="text/css" href="/styles.css">
 </head>
 <body>
@@ -38,12 +38,16 @@
 </div>
 
 <script>
-    // Once the webpage loads, call the goHome function
+    const baseURL = "http://localhost:1234";
+    const homeName = "NLF File System";
+    let currentPath = homeName;
+
     window.addEventListener('load', goHome);
-    const baseURL = 'http://localhost:1234';
 
     async function goHome() {
-        clearTable();
+        console.log("Current path: ", currentPath);
+        currentPath = homeName;
+        console.log("Changing directory into: ", currentPath);
 
         const res = await fetch(baseURL + '/home',
             {
@@ -54,31 +58,89 @@
         const data = await res.json();
         console.log(data);
 
-        for (const item of (data.slice(0, -1))) {
-            addRow(item.name, item.date, item.type, item.size, item.url);
-        }
-
-        document.getElementById("breadcrumb").textContent = data.at(-1).path;
+        updatePage(data, currentPath);
     }
 
     async function changeDir(folderName) {
-        console.log(folderName);
-        clearTable();
+        console.log("Current path: ", currentPath);
+        currentPath = `${currentPath}/${folderName}`;
 
-        const res = await fetch(baseURL + `/info2?url=${folderName}`,
+        console.log("Changing directory into: ", currentPath);
+        const res = await fetch(baseURL + `/dir?url=${currentPath}`,
             {
                 method: 'GET'
             });
         console.log(res);
-
         const data = await res.json();
         console.log(data);
 
-        for (const item of (data.slice(0, -1))) {
-            addRow(item.name, item.date, item.type, item.size, item.url);
+        updatePage(data, currentPath);
+    }
+
+    async function goUp() {
+        console.log("Current path: ", currentPath);
+
+        const pathParts = currentPath.split('/'); // Split the path by slashes
+        // Remove the last directory
+        const newPath = pathParts.slice(0, -1).join('/');
+
+        currentPath = newPath;
+
+        console.log("Changing directory into: ", newPath);
+        const res = await fetch(baseURL + `/dir?url=${newPath}`,
+            {
+                method: 'GET'
+            });
+        console.log(res);
+        const data = await res.json();
+        console.log(data);
+
+        updatePage(data, currentPath);
+    }
+
+    function updatePage(data, path){
+        // Clear table
+        document.getElementById('file-table-body').innerHTML = '';
+
+        // Add rows to table
+        for (const item of data) {
+            let table = document.getElementById("file-table-body");
+            let row = table.insertRow(-1);
+            let cell1 = row.insertCell(0); // Checkbox
+            let cell2 = row.insertCell(1); // Name
+            let cell3 = row.insertCell(2); // Date
+            let cell4 = row.insertCell(3); // Type
+            let cell5 = row.insertCell(4); // Size
+            let cell6 = row.insertCell(5); // Action
+
+            // Do not have a checkbox beside the '..' item at the top of the list
+            if (item.name !== '..') {
+                cell1.innerHTML = `<input type="checkbox" value="${item.name}">`
+            }
+
+            if (item.type === "Folder") {
+                // Names of folders should be clickable links
+                cell2.innerHTML = `<a href="#" onclick="changeDir('${item.name}')">${item.name}</a>`
+
+                // Clicking on '..' should bring you up one directory
+                if (item.name === '..') {
+                    cell2.innerHTML = `<a href="#" onclick="goUp()">${item.name}</a>`
+                }
+            } else {
+                cell2.innerHTML = item.name;
+            }
+
+            cell3.innerHTML = item.date;
+            cell4.innerHTML = item.type;
+
+            if (item.type === "File") {
+                cell5.innerHTML = item.size;
+                cell6.innerHTML = `<button onclick="window.location.href='/download?filepath=${item.url}'">Download</button>`;
+            }
         }
 
-        document.getElementById("breadcrumb").textContent = folderName;
+        // Update breadcrumb
+        document.getElementById("breadcrumb").textContent = currentPath;
     }
 
     function zipItems() {
@@ -87,47 +149,16 @@
 
         checkboxes.forEach(checkbox => {
             if (checkbox.checked) {
-                selectedItems.push(checkbox.value);
+                selectedItems.push(`${currentPath}/${checkbox.value}`);
             }
         });
         console.log(selectedItems);
 
-        window.location.href=`/zip?files=${selectedItems.toString()}`;
+        window.location.href = `/zip?files=${selectedItems.toString()}`;
     }
 
-    function clearTable() {
-        document.getElementById('file-table-body').innerHTML = '';
-    }
-
-    function addRow(name, date, type, size, url) {
-        let table = document.getElementById("file-table-body");
-        let row = table.insertRow(-1);
-        let cell1 = row.insertCell(0); // Checkbox
-        let cell2 = row.insertCell(1); // Name
-        let cell3 = row.insertCell(2); // Date
-        let cell4 = row.insertCell(3); // Type
-        let cell5 = row.insertCell(4); // Size
-        let cell6 = row.insertCell(5); // Action
-
-        if (name !== '..') {
-            cell1.innerHTML = `<input type="checkbox" value="${name}">`
-        }
-
-        if (type === "Folder") {
-            let newURL = url.replace(/\\/g, '/');
-            cell2.innerHTML = `<a href="#" onclick="changeDir('${newURL}')">${name}</a>`
-        } else {
-            cell2.innerHTML = name;
-        }
-
-        cell3.innerHTML = date;
-        cell4.innerHTML = type;
-
-        if (type === "File") {
-            cell5.innerHTML = size;
-            cell6.innerHTML = `<button onclick="window.location.href='/download?filename=${name}'">Download</button>`;
-        }
-    }
 </script>
+
+
 </body>
 </html>
