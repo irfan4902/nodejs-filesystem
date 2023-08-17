@@ -44,89 +44,68 @@
 
     window.addEventListener('load', goHome);
 
+    async function fetchData(url) {
+        const response = await fetch(url);
+        return await response.json();
+    }
+
+    /**
+     * Change the directory to root directory of the file system
+     * */
     async function goHome() {
-        console.log("Current path: ", currentPath);
         currentPath = homeName;
-        console.log("Changing directory into: ", currentPath);
-
-        const res = await fetch(baseURL + '/home',
-            {
-                method: 'GET'
-            });
-        console.log(res);
-
-        const data = await res.json();
-        console.log(data);
-
-        updatePage(data, currentPath);
+        const data = await fetchData(baseURL + '/home');
+        updateTable(data);
+        updateBreadcrumb();
     }
 
+    /**
+     * Change the directory to the specified argument, which is a child directory of the current path
+     * */
     async function changeDir(folderName) {
-        console.log("Current path: ", currentPath);
         currentPath = `${currentPath}/${folderName}`;
-
-        console.log("Changing directory into: ", currentPath);
-        const res = await fetch(baseURL + `/dir?url=${currentPath}`,
-            {
-                method: 'GET'
-            });
-        console.log(res);
-        const data = await res.json();
-        console.log(data);
-
-        updatePage(data, currentPath);
+        const data = await fetchData(baseURL + `/dir?url=${currentPath}`);
+        updateTable(data);
+        updateBreadcrumb();
     }
 
+    /**
+     * Change the directory to the parent directory of the current path
+     * */
     async function goUp() {
-        console.log("Current path: ", currentPath);
-
-        const pathParts = currentPath.split('/'); // Split the path by slashes
-        // Remove the last directory
+        // Remove last directory from path
+        const pathParts = currentPath.split('/');
         const newPath = pathParts.slice(0, -1).join('/');
-
         currentPath = newPath;
-
-        console.log("Changing directory into: ", newPath);
-        const res = await fetch(baseURL + `/dir?url=${newPath}`,
-            {
-                method: 'GET'
-            });
-        console.log(res);
-        const data = await res.json();
-        console.log(data);
-
-        updatePage(data, currentPath);
+        const data = await fetchData(baseURL + `/dir?url=${newPath}`);
+        updateTable(data);
+        updateBreadcrumb();
     }
 
-    function updatePage(data, path){
-        // Clear table
-        document.getElementById('file-table-body').innerHTML = '';
+    /**
+     * Clear the <tbody> element and add new rows from the JSON data received returned after making a GET request
+     * */
+    function updateTable(data) {
+        const tableBody = document.getElementById('file-table-body');
+        tableBody.innerHTML = '';
 
-        // Add rows to table
         for (const item of data) {
-            let table = document.getElementById("file-table-body");
-            let row = table.insertRow(-1);
-            let cell1 = row.insertCell(0); // Checkbox
-            let cell2 = row.insertCell(1); // Name
-            let cell3 = row.insertCell(2); // Date
-            let cell4 = row.insertCell(3); // Type
-            let cell5 = row.insertCell(4); // Size
-            let cell6 = row.insertCell(5); // Action
+            const row = tableBody.insertRow(-1);
+            const cell1 = row.insertCell(0); // Checkboxes
+            const cell2 = row.insertCell(1); // Name
+            const cell3 = row.insertCell(2); // Date Modified
+            const cell4 = row.insertCell(3); // Type
+            const cell5 = row.insertCell(4); // Size
+            const cell6 = row.insertCell(5); // Action
 
-            // Do not have a checkbox beside the '..' item at the top of the list
-            if (item.name !== '..') {
-                cell1.innerHTML = `<input type="checkbox" value="${item.name}">`
-            }
+            // If the item name is not '..', then add a checkbox
+            cell1.innerHTML = item.name !== '..' ? `<input type="checkbox" value="${item.name}">` : '';
 
-            if (item.type === "Folder") {
-                // Names of folders should be clickable links
-                cell2.innerHTML = `<a href="#" onclick="changeDir('${item.name}')">${item.name}</a>`
-
-                // Clicking on '..' should bring you up one directory
-                if (item.name === '..') {
-                    cell2.innerHTML = `<a href="#" onclick="goUp()">${item.name}</a>`
-                }
-            } else {
+            if (item.name === '..') {
+                cell2.innerHTML = `<a href="#" onclick="goUp()">${item.name}</a>`;
+            } else if (item.type === "Folder") {
+                cell2.innerHTML = `<a href="#" onclick="changeDir('${item.name}')">${item.name}</a>`;
+            } else if (item.type === "File") {
                 cell2.innerHTML = item.name;
             }
 
@@ -138,23 +117,20 @@
                 cell6.innerHTML = `<button onclick="window.location.href='/download?filepath=${item.url}'">Download</button>`;
             }
         }
+    }
 
-        // Update breadcrumb
+    /** Updates the breadcrumb in the page to match the current path. */
+    function updateBreadcrumb() {
         document.getElementById("breadcrumb").textContent = currentPath;
     }
 
+    /** Gets all selected checkboxes, appends their value(name) to the current path and make a get request
+     *  to the /zip resource with them as parameters
+     */
     function zipItems() {
-        const checkboxes = document.querySelectorAll('input[type="checkbox"]');
-        const selectedItems = [];
-
-        checkboxes.forEach(checkbox => {
-            if (checkbox.checked) {
-                selectedItems.push(`${currentPath}/${checkbox.value}`);
-            }
-        });
-        console.log(selectedItems);
-
-        window.location.href = `/zip?files=${selectedItems.toString()}`;
+        const checkboxes = document.querySelectorAll('input[type="checkbox"]:checked');
+        const selectedItems = Array.from(checkboxes).map(checkbox => `${currentPath}/${checkbox.value}`);
+        window.location.href = `/zip?files=${selectedItems.join()}`;
     }
 
 </script>

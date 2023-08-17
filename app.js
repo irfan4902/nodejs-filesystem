@@ -66,6 +66,11 @@ app.get("/zip", async (req, res) => {
     res.attachment('NLF-Files.zip');
 });
 
+/**
+ * Sends file data for the given directory.
+ * @param {string} directory - Directory path
+ * @param {function} callback - Callback function
+ */
 function sendFiles(directory, callback) {
     const fileData = [];
 
@@ -130,6 +135,11 @@ function sendFiles(directory, callback) {
     });
 }
 
+/**
+ * Adds files or folders to the .zip archive.
+ * @param {Archiver} zip - Archiver object
+ * @param {string[]} listOfItems - List of item paths
+ */
 async function addStuffToZip(zip, listOfItems) {
     for (let item of listOfItems) {
         let itemName = path.basename(item);
@@ -155,7 +165,10 @@ async function addStuffToZip(zip, listOfItems) {
     }
 }
 
-// Comparison function to sort items based on name and type
+/**
+ * Compares items for sorting.
+ * @returns {number} - Comparison result.
+ */
 function compare(a, b) {
     // Folders are sorted above the files
     if (a.type === "Folder" && b.type !== "Folder") {
@@ -174,6 +187,11 @@ function compare(a, b) {
     return 0;
 }
 
+/**
+ * Formats file size for better readability.
+ * @param {number} bytes - File size in bytes
+ * @returns {string} - Formatted file size
+ */
 function formatFileSize(bytes) {
     if (bytes < 1024) return bytes + ' B';
     if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(2) + ' KB';
