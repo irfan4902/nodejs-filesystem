@@ -1,8 +1,8 @@
 const fs = require('fs');
 const path = require('path');
 const url = require("url");
-const express = require("express");
 const archiver = require('archiver');
+const express = require("express");
 const app = express();
 app.use(express.static(path.join(__dirname, 'public')));
 
@@ -80,6 +80,13 @@ function sendFiles(directory, callback) {
         if (err) {
             console.error('Error reading folder:', err);
             callback(err, null);
+            return;
+        }
+
+        // If the folder is empty, return []
+        if (items.length === 0) {
+            console.log(`Folder ${directory} is empty.`);
+            callback(null, []);
             return;
         }
 

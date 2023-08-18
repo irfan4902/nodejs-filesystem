@@ -46,15 +46,25 @@
 
     async function fetchData(url) {
         const response = await fetch(url);
-        return await response.json();
+        return response.json();
     }
 
     /**
      * Change the directory to root directory of the file system
      * */
     async function goHome() {
+        let oldPath = currentPath;
         currentPath = homeName;
         const data = await fetchData(baseURL + '/home');
+
+        // Do not update the page and currentPath if the user clicks on an empty directory
+        if (data.length !== 0){
+            updateTable(data);
+            updateBreadcrumb();
+        } else {
+            currentPath = oldPath;
+        }
+
         updateTable(data);
         updateBreadcrumb();
     }
@@ -134,7 +144,6 @@
     }
 
 </script>
-
 
 </body>
 </html>
