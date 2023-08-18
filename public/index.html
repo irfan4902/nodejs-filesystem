@@ -33,13 +33,14 @@
 
     </table>
 
+    <br>
     <button onclick="zipItems()">Download selected items as .zip</button>
 
 </div>
 
 <script>
     const baseURL = "http://localhost:1234";
-    const homeName = "NLF File System";
+    const homeName = "File System";
     let currentPath = homeName;
 
     window.addEventListener('load', goHome);
@@ -53,18 +54,8 @@
      * Change the directory to root directory of the file system
      * */
     async function goHome() {
-        let oldPath = currentPath;
         currentPath = homeName;
         const data = await fetchData(baseURL + '/home');
-
-        // Do not update the page and currentPath if the user clicks on an empty directory
-        if (data.length !== 0){
-            updateTable(data);
-            updateBreadcrumb();
-        } else {
-            currentPath = oldPath;
-        }
-
         updateTable(data);
         updateBreadcrumb();
     }
@@ -112,7 +103,7 @@
             cell1.innerHTML = item.name !== '..' ? `<input type="checkbox" value="${item.name}">` : '';
 
             if (item.name === '..') {
-                cell2.innerHTML = `<a href="#" onclick="goUp()">${item.name}</a>`;
+                cell2.innerHTML = `<img class="arrow" src="folder_up.png" onclick="goUp()">`;
             } else if (item.type === "Folder") {
                 cell2.innerHTML = `<a href="#" onclick="changeDir('${item.name}')">${item.name}</a>`;
             } else if (item.type === "File") {

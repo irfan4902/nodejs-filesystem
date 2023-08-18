@@ -11,7 +11,7 @@ const port = 1234;
 // Address of the root directory of the file system
 const rootPath = "C:/Users/irfan.aslam/Desktop/test folder";
 // Name of the root directory in the client (displayed on the breadcrumbs)
-const homeName = "NLF File System";
+const homeName = "File System";
 
 app.get("/home", (req, res) => {
     console.log("Current URL:", rootPath);
@@ -83,11 +83,19 @@ function sendFiles(directory, callback) {
             return;
         }
 
-        // If the folder is empty, return []
-        if (items.length === 0) {
-            console.log(`Folder ${directory} is empty.`);
-            callback(null, []);
-            return;
+        // Remove the last directory
+        const pathParts = directory.split('/');
+        const newPath = pathParts.slice(0, -1).join('/');
+
+        // Add the .. item at the top of the table
+        if (fileData.length < 1 && directory !== rootPath) {
+            fileData.push({
+                name: "..",
+                date: "",
+                type: "Folder",
+                size: "",
+                url: newPath.replace(rootPath, homeName)
+            });
         }
 
         let processedCount = 0;
@@ -100,21 +108,6 @@ function sendFiles(directory, callback) {
                     console.error('Error getting file stats:', err);
                     callback(err, null);
                     return;
-                }
-
-                // Remove the last directory
-                const pathParts = directory.split('/');
-                const newPath = pathParts.slice(0, -1).join('/');
-
-                // Add the .. item at the top of the table
-                if (fileData.length < 1 && directory != rootPath) {
-                    fileData.push({
-                        name: "..",
-                        date: "",
-                        type: "Folder",
-                        size: "",
-                        url: newPath.replace(rootPath, homeName)
-                    });
                 }
 
                 let item = {
@@ -136,9 +129,13 @@ function sendFiles(directory, callback) {
 
                 if (processedCount === items.length) {
                     callback(null, fileData.sort(compare));
+                    return;
                 }
             });
         });
+        if (processedCount === items.length) {
+            callback(null, fileData.sort(compare));
+        }
     });
 }
 
