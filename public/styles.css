@@ -32,6 +32,7 @@ table {
 }
 
 .arrow {
-    width:20px;
+    width: 22px;
+    margin-bottom: -6px;
     cursor: pointer;
 }

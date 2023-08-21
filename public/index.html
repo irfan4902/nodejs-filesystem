@@ -103,7 +103,7 @@
             cell1.innerHTML = item.name !== '..' ? `<input type="checkbox" value="${item.name}">` : '';
 
             if (item.name === '..') {
-                cell2.innerHTML = `<img class="arrow" src="folder_up.png" onclick="goUp()">`;
+                cell2.innerHTML = `<div><img class="arrow" src="img/folder_up.png" onclick="goUp()"><a href="#" onclick="goUp()">[parent directory]</a></div>`;
             } else if (item.type === "Folder") {
                 cell2.innerHTML = `<a href="#" onclick="changeDir('${item.name}')">${item.name}</a>`;
             } else if (item.type === "File") {
