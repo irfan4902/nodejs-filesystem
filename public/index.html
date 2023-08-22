@@ -14,8 +14,8 @@
 
     <p id="breadcrumb"></p>
 
-    <button class="prev" onclick="prevPage()">Previous</button>
-    <button class="next" onclick="nextPage()">Next</button>
+    <button class="prev" onclick="changePage(-1)">Previous</button>
+    <button class="next" onclick="changePage(1)">Next</button>
 
     <table id="file-table">
 
@@ -36,8 +36,8 @@
 
     </table>
 
-    <button class="prev" onclick="prevPage()">Previous</button>
-    <button class="next" onclick="nextPage()">Next</button>
+    <button class="prev" onclick="changePage(-1)">Previous</button>
+    <button class="next" onclick="changePage(1)">Next</button>
 
     <br>
     <br>
@@ -52,7 +52,7 @@
 
     let lastClickedIndex = -1;
     let page = 1;
-    let limit = 5;
+    let limit = 3;
 
     window.addEventListener('load', goHome);
 
@@ -68,7 +68,7 @@
         currentPath = homeName;
         page = 1;
         const data = await fetchData(baseURL + `/home?page=${page}&limit=${limit}`);
-        bruh(data);
+        updatePagination(data);
         updateTable(data);
         updateBreadcrumb();
     }
@@ -80,7 +80,7 @@
         currentPath = `${currentPath}/${folderName}`;
         page = 1;
         const data = await fetchData(baseURL + `/dir?url=${currentPath}&page=${page}&limit=${limit}`);
-        bruh(data);
+        updatePagination(data);
         updateTable(data);
         updateBreadcrumb();
     }
@@ -95,7 +95,7 @@
         currentPath = newPath;
         page = 1;
         const data = await fetchData(baseURL + `/dir?url=${newPath}&page=${page}&limit=${limit}`);
-        bruh(data);
+        updatePagination(data);
         updateTable(data);
         updateBreadcrumb();
     }
@@ -145,6 +145,9 @@
 
     }
 
+    /**
+     * Enable shift-clicking to select multiple checkboxes at one go
+     */
     function handleCheckboxClick(event, currentIndex) {
         let checkboxes = document.querySelectorAll('input[type="checkbox"]');
 
@@ -160,7 +163,9 @@
         lastClickedIndex = currentIndex;
     }
 
-    /** Updates the breadcrumb in the page to match the current path. */
+    /**
+     *  Updates the breadcrumb in the page to match the current path.
+     */
     function updateBreadcrumb() {
         document.getElementById("breadcrumb").textContent = currentPath;
     }
@@ -182,44 +187,30 @@
         window.location.href = `/zip?files=${selectedItems.join()}`;
     }
 
-    async function prevPage(){
-        page--;
-        const data = await fetchData(baseURL + `/home?page=${page}&limit=${limit}`);
-        bruh(data);
+    /**
+     * Increase or decrease the page number
+     * @param change number to add to page number
+     */
+    async function changePage(change) {
+        page += change;
+        const data = await fetchData(baseURL + `/dir?url=${currentPath}&page=${page}&limit=${limit}`);
+        updatePagination(data);
         updateTable(data);
-        updateBreadcrumb();
     }
 
-    async function nextPage(){
-        page++;
-        const data = await fetchData(baseURL + `/home?page=${page}&limit=${limit}`);
-        bruh(data);
-        updateTable(data);
-        updateBreadcrumb();
-    }
+    const nextButtons = document.getElementsByClassName("next");
+    const prevButtons = document.getElementsByClassName("prev");
 
-    function bruh (data){
-        if (!data.hasOwnProperty("next")) {
-            let hi = document.getElementsByClassName("next");
-            for (let h of hi){
-                h.disabled = true;
-            }
-        } else {
-            let hi = document.getElementsByClassName("next");
-            for (let h of hi){
-                h.disabled = false;
-            }
+    /**
+     * Enable or disable the 'Next' and 'Previous' buttons depending on number of page results
+     * @param data JSON response
+     */
+    function updatePagination(data) {
+        for (let b of nextButtons) {
+            b.disabled = !data.hasOwnProperty("next");
         }
-        if (!data.hasOwnProperty("prev")) {
-            let hi = document.getElementsByClassName("prev");
-            for (let h of hi){
-                h.disabled = true;
-            }
-        } else {
-            let hi = document.getElementsByClassName("prev");
-            for (let h of hi){
-                h.disabled = false;
-            }
+        for (let b of prevButtons) {
+            b.disabled = !data.hasOwnProperty("prev");
         }
     }
 

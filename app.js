@@ -23,7 +23,7 @@ app.get("/home", (req, res) => {
             console.error('Error sending files:', err);
             res.status(500).send('Internal Server Error');
         } else {
-            res.status(200).json(paginatedResults(fileData, page, limit));
+            res.status(200).json(paginatedResults(fileData, page, limit, homeName));
         }
     });
 });
@@ -41,7 +41,7 @@ app.get("/dir", (req, res) => {
             console.error('Error sending files:', err);
             res.status(500).send('Internal Server Error');
         } else {
-            res.status(200).json(paginatedResults(fileData, page, limit));
+            res.status(200).json(paginatedResults(fileData, page, limit, url));
         }
     });
 });
@@ -71,10 +71,9 @@ app.get("/zip", async (req, res) => {
     res.attachment('NLF-Files.zip');
 });
 
-function paginatedResults (model, page, limit) {
+function paginatedResults (model, page, limit, url) {
 
     const startIndex = (page - 1) * limit;
-    // const endIndex = page * limit;
     const endIndex = startIndex + limit;
 
     const results = {};
@@ -87,48 +86,21 @@ function paginatedResults (model, page, limit) {
     }
 
     if (startIndex > 0) {
-        results.previous = {
+        results.prev = {
             page: page -1,
             limit: limit
         }
     }
 
-    results.results = model.slice(startIndex, endIndex);
+    let slice = model.slice(startIndex, endIndex);
 
-    return results;
-}
-
-function paginatedResults2 (model) {
-    return (req, res, next) => {
-
-        const page = parseInt(req.query.page);
-        const limit = parseInt(req.query.limit);
-
-        const startIndex = (page - 1) * limit;
-        const endIndex = page * limit;
-
-        const results = {}
-
-        if (endIndex < model.length) {
-            results.next = {
-                page: page + 1,
-                limit: limit
-            }
-        }
-
-        if (startIndex > 0) {
-            results.previous = {
-                page: page - 1,
-                limit: limit
-            }
-        }
-
-        results.results = model.slice(startIndex, endIndex);
-
-        res.paginatedResults = results;
-        next();
-
+    // If not in the root directory, make [parent directory] be the first in the table
+    if (page != 1 && url != homeName) {
+        slice.unshift(model[0]);
     }
+
+    results.results = slice;
+    return results;
 }
 
 /**
