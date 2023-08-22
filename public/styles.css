@@ -31,8 +31,22 @@ table {
     padding: 20px;
 }
 
-.arrow {
+.parent {
     width: 22px;
     margin-bottom: -6px;
     cursor: pointer;
+}
+
+.arrow {
+    float: right;
+    width: 20px;
+    opacity: 0;
+}
+
+th:hover {
+    cursor: pointer;
+}
+
+th:hover .arrow {
+    opacity: 1;
 }
