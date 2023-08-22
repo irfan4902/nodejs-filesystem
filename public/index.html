@@ -14,6 +14,9 @@
 
     <p id="breadcrumb"></p>
 
+    <button class="prev" onclick="prevPage()">Previous</button>
+    <button class="next" onclick="nextPage()">Next</button>
+
     <table id="file-table">
 
         <thead>
@@ -33,6 +36,10 @@
 
     </table>
 
+    <button class="prev" onclick="prevPage()">Previous</button>
+    <button class="next" onclick="nextPage()">Next</button>
+
+    <br>
     <br>
     <button onclick="zipItems()">Download selected items as .zip</button>
 
@@ -43,8 +50,9 @@
     const homeName = "File System";
     let currentPath = homeName;
 
+    let lastClickedIndex = -1;
     let page = 1;
-    let limit = 6;
+    let limit = 5;
 
     window.addEventListener('load', goHome);
 
@@ -58,7 +66,9 @@
      * */
     async function goHome() {
         currentPath = homeName;
+        page = 1;
         const data = await fetchData(baseURL + `/home?page=${page}&limit=${limit}`);
+        bruh(data);
         updateTable(data);
         updateBreadcrumb();
     }
@@ -68,7 +78,9 @@
      * */
     async function changeDir(folderName) {
         currentPath = `${currentPath}/${folderName}`;
+        page = 1;
         const data = await fetchData(baseURL + `/dir?url=${currentPath}&page=${page}&limit=${limit}`);
+        bruh(data);
         updateTable(data);
         updateBreadcrumb();
     }
@@ -81,7 +93,9 @@
         const pathParts = currentPath.split('/');
         const newPath = pathParts.slice(0, -1).join('/');
         currentPath = newPath;
+        page = 1;
         const data = await fetchData(baseURL + `/dir?url=${newPath}&page=${page}&limit=${limit}`);
+        bruh(data);
         updateTable(data);
         updateBreadcrumb();
     }
@@ -121,6 +135,29 @@
                 cell6.innerHTML = `<button onclick="window.location.href='/download?filepath=${item.url}'">Download</button>`;
             }
         }
+
+        let checkboxes = document.querySelectorAll('input[type="checkbox"]');
+
+        for (let i = 0; i < checkboxes.length; i++) {
+            const checkbox = checkboxes[i];
+            checkbox.addEventListener('click', event => handleCheckboxClick(event, i));
+        }
+
+    }
+
+    function handleCheckboxClick(event, currentIndex) {
+        let checkboxes = document.querySelectorAll('input[type="checkbox"]');
+
+        if (event.shiftKey && lastClickedIndex !== -1) {
+            const minIndex = Math.min(currentIndex, lastClickedIndex);
+            const maxIndex = Math.max(currentIndex, lastClickedIndex);
+
+            for (let i = minIndex + 1; i < maxIndex; i++) {
+                checkboxes[i].checked = true;
+            }
+        }
+
+        lastClickedIndex = currentIndex;
     }
 
     /** Updates the breadcrumb in the page to match the current path. */
@@ -134,8 +171,56 @@
      */
     function zipItems() {
         const checkboxes = document.querySelectorAll('input[type="checkbox"]:checked');
-        const selectedItems = Array.from(checkboxes).map(checkbox => `${currentPath}/${checkbox.value}`);
+        const selectedItems = [];
+
+        for (let i = 0; i < checkboxes.length; i++) {
+            if (checkboxes[i].checked) {
+                selectedItems.push(`${currentPath}/${checkboxes[i].value}`);
+            }
+        }
+
         window.location.href = `/zip?files=${selectedItems.join()}`;
+    }
+
+    async function prevPage(){
+        page--;
+        const data = await fetchData(baseURL + `/home?page=${page}&limit=${limit}`);
+        bruh(data);
+        updateTable(data);
+        updateBreadcrumb();
+    }
+
+    async function nextPage(){
+        page++;
+        const data = await fetchData(baseURL + `/home?page=${page}&limit=${limit}`);
+        bruh(data);
+        updateTable(data);
+        updateBreadcrumb();
+    }
+
+    function bruh (data){
+        if (!data.hasOwnProperty("next")) {
+            let hi = document.getElementsByClassName("next");
+            for (let h of hi){
+                h.disabled = true;
+            }
+        } else {
+            let hi = document.getElementsByClassName("next");
+            for (let h of hi){
+                h.disabled = false;
+            }
+        }
+        if (!data.hasOwnProperty("prev")) {
+            let hi = document.getElementsByClassName("prev");
+            for (let h of hi){
+                h.disabled = true;
+            }
+        } else {
+            let hi = document.getElementsByClassName("prev");
+            for (let h of hi){
+                h.disabled = false;
+            }
+        }
     }
 
 </script>
