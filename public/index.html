@@ -43,6 +43,9 @@
     const homeName = "File System";
     let currentPath = homeName;
 
+    let page = 1;
+    let limit = 6;
+
     window.addEventListener('load', goHome);
 
     async function fetchData(url) {
@@ -55,7 +58,7 @@
      * */
     async function goHome() {
         currentPath = homeName;
-        const data = await fetchData(baseURL + '/home');
+        const data = await fetchData(baseURL + `/home?page=${page}&limit=${limit}`);
         updateTable(data);
         updateBreadcrumb();
     }
@@ -65,7 +68,7 @@
      * */
     async function changeDir(folderName) {
         currentPath = `${currentPath}/${folderName}`;
-        const data = await fetchData(baseURL + `/dir?url=${currentPath}`);
+        const data = await fetchData(baseURL + `/dir?url=${currentPath}&page=${page}&limit=${limit}`);
         updateTable(data);
         updateBreadcrumb();
     }
@@ -78,7 +81,7 @@
         const pathParts = currentPath.split('/');
         const newPath = pathParts.slice(0, -1).join('/');
         currentPath = newPath;
-        const data = await fetchData(baseURL + `/dir?url=${newPath}`);
+        const data = await fetchData(baseURL + `/dir?url=${newPath}&page=${page}&limit=${limit}`);
         updateTable(data);
         updateBreadcrumb();
     }
@@ -90,7 +93,7 @@
         const tableBody = document.getElementById('file-table-body');
         tableBody.innerHTML = '';
 
-        for (const item of data) {
+        for (const item of data.results) {
             const row = tableBody.insertRow(-1);
             const cell1 = row.insertCell(0); // Checkboxes
             const cell2 = row.insertCell(1); // Name
@@ -125,8 +128,9 @@
         document.getElementById("breadcrumb").textContent = currentPath;
     }
 
-    /** Gets all selected checkboxes, appends their value(name) to the current path and make a get request
-     *  to the /zip resource with them as parameters
+    /**
+     * Gets all selected checkboxes, appends their value(name) to the current path and make a get request
+     * to the /zip resource with them as parameters.
      */
     function zipItems() {
         const checkboxes = document.querySelectorAll('input[type="checkbox"]:checked');

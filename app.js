@@ -14,19 +14,24 @@ const rootPath = "C:/Users/irfan.aslam/Desktop/test folder";
 const homeName = "File System";
 
 app.get("/home", (req, res) => {
+    const page = parseInt(req.query.page);
+    const limit = parseInt(req.query.limit);
+
     console.log("Current URL:", rootPath);
     sendFiles(rootPath, (err, fileData) => {
         if (err) {
             console.error('Error sending files:', err);
             res.status(500).send('Internal Server Error');
         } else {
-            res.status(200).json(fileData);
+            res.status(200).json(paginatedResults(fileData, page, limit));
         }
     });
 });
 
 app.get("/dir", (req, res) => {
     const url = req.query.url;
+    const page = parseInt(req.query.page);
+    const limit = parseInt(req.query.limit);
 
     let newUrl = url.replace(homeName, rootPath);
     console.log("Changing directory to:", newUrl);
@@ -36,7 +41,7 @@ app.get("/dir", (req, res) => {
             console.error('Error sending files:', err);
             res.status(500).send('Internal Server Error');
         } else {
-            res.status(200).json(fileData);
+            res.status(200).json(paginatedResults(fileData, page, limit));
         }
     });
 });
@@ -65,6 +70,66 @@ app.get("/zip", async (req, res) => {
     zip.pipe(res);
     res.attachment('NLF-Files.zip');
 });
+
+function paginatedResults (model, page, limit) {
+
+    const startIndex = (page - 1) * limit;
+    // const endIndex = page * limit;
+    const endIndex = startIndex + limit;
+
+    const results = {};
+
+    if (endIndex < model.length) {
+        results.next = {
+            page: page + 1,
+            limit: limit
+        }
+    }
+
+    if (startIndex > 0) {
+        results.previous = {
+            page: page -1,
+            limit: limit
+        }
+    }
+
+    results.results = model.slice(startIndex, endIndex);
+
+    return results;
+}
+
+function paginatedResults2 (model) {
+    return (req, res, next) => {
+
+        const page = parseInt(req.query.page);
+        const limit = parseInt(req.query.limit);
+
+        const startIndex = (page - 1) * limit;
+        const endIndex = page * limit;
+
+        const results = {}
+
+        if (endIndex < model.length) {
+            results.next = {
+                page: page + 1,
+                limit: limit
+            }
+        }
+
+        if (startIndex > 0) {
+            results.previous = {
+                page: page - 1,
+                limit: limit
+            }
+        }
+
+        results.results = model.slice(startIndex, endIndex);
+
+        res.paginatedResults = results;
+        next();
+
+    }
+}
 
 /**
  * Sends file data for the given directory.
@@ -128,12 +193,14 @@ function sendFiles(directory, callback) {
                 processedCount++;
 
                 if (processedCount === items.length) {
+                    // console.log(fileData.sort(compare));
                     callback(null, fileData.sort(compare));
                     return;
                 }
             });
         });
         if (processedCount === items.length) {
+            // console.log(fileData.sort(compare));
             callback(null, fileData.sort(compare));
         }
     });
