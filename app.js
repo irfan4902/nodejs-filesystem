@@ -92,11 +92,14 @@ function paginatedResults (model, page, limit, url) {
         }
     }
 
+    results.totalPages = Math.ceil(model.length / limit);
+
     let slice = model.slice(startIndex, endIndex);
 
     // If not in the root directory, make [parent directory] be the first in the table
     if (page != 1 && url != homeName) {
         slice.unshift(model[0]);
+
     }
 
     results.results = slice;

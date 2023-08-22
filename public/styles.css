@@ -50,3 +50,12 @@ th:hover {
 th:hover .arrow {
     opacity: 1;
 }
+
+.limit {
+    float: right;
+    margin-right: 5px;
+}
+
+.limit > input {
+    width: 40px;
+}

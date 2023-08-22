@@ -14,8 +14,9 @@
 
     <p id="breadcrumb"></p>
 
-    <button class="prev" onclick="changePage(-1)">Previous</button>
-    <button class="next" onclick="changePage(1)">Next</button>
+    <button class="btn_prev" onclick="changePage(-1)">Previous</button>
+    <button class="btn_next" onclick="changePage(1)">Next</button>
+    <br><br>
 
     <table id="file-table">
 
@@ -48,8 +49,17 @@
 
     </table>
 
-    <button class="prev" onclick="changePage(-1)">Previous</button>
-    <button class="next" onclick="changePage(1)">Next</button>
+    <br>
+    <button class="btn_prev" onclick="changePage(-1)">Previous</button>
+    <button class="btn_next" onclick="changePage(1)">Next</button>
+
+    <span style="float:right;" id="txt_page">Page: </span>
+
+    <span class="limit">
+        <label for="input_limit">Limit: </label>
+        <input type="number" id="input_limit">
+    </span>
+
 
     <br>
     <br>
@@ -71,7 +81,18 @@
 
     let lastClickedIndex = -1;
     let page = 1;
-    let limit = 3;
+
+    const limitInput = document.getElementById("input_limit");
+    const limitObject = {};
+    Object.defineProperty(limitObject, "limit", {
+        get(){
+            return limitInput.value;
+        },
+        set(newValue){
+            limitInput.value = newValue;
+        }
+    });
+    limitObject.limit = 3;
 
     window.addEventListener('load', goHome);
 
@@ -86,7 +107,7 @@
     async function goHome() {
         currentPath = homeName;
         page = 1;
-        const data = await fetchData(baseURL + `/home?page=${page}&limit=${limit}`);
+        const data = await fetchData(baseURL + `/home?page=${page}&limit=${limitObject.limit}`);
         updateTable(data);
         updatePagination(data);
         updateBreadcrumb();
@@ -98,7 +119,7 @@
     async function changeDir(folderName) {
         currentPath = `${currentPath}/${folderName}`;
         page = 1;
-        const data = await fetchData(baseURL + `/dir?url=${currentPath}&page=${page}&limit=${limit}`);
+        const data = await fetchData(baseURL + `/dir?url=${currentPath}&page=${page}&limit=${limitObject.limit}`);
         updateTable(data);
         updatePagination(data);
         updateBreadcrumb();
@@ -113,7 +134,7 @@
         const newPath = pathParts.slice(0, -1).join('/');
         currentPath = newPath;
         page = 1;
-        const data = await fetchData(baseURL + `/dir?url=${newPath}&page=${page}&limit=${limit}`);
+        const data = await fetchData(baseURL + `/dir?url=${newPath}&page=${page}&limit=${limitObject.limit}`);
         updateTable(data);
         updatePagination(data);
         updateBreadcrumb();
@@ -125,7 +146,7 @@
      */
     async function changePage(change) {
         page += change;
-        const data = await fetchData(baseURL + `/dir?url=${currentPath}&page=${page}&limit=${limit}`);
+        const data = await fetchData(baseURL + `/dir?url=${currentPath}&page=${page}&limit=${limitObject.limit}`);
         updateTable(data);
         updatePagination(data);
     }
@@ -175,8 +196,9 @@
 
     }
 
-    const nextButtons = document.getElementsByClassName("next");
-    const prevButtons = document.getElementsByClassName("prev");
+    const nextButtons = document.getElementsByClassName("btn_next");
+    const prevButtons = document.getElementsByClassName("btn_prev");
+    const pageText = document.getElementById("txt_page");
 
     /**
      * Enable or disable the 'Next' and 'Previous' buttons depending on number of page results
@@ -189,6 +211,14 @@
         for (let b of prevButtons) {
             b.disabled = !data.hasOwnProperty("prev");
         }
+        pageText.innerHTML = `Page: ${page}/${data.totalPages}`;
+    }
+
+    /**
+     *  Updates the breadcrumb in the page to match the current path.
+     */
+    function updateBreadcrumb() {
+        document.getElementById("breadcrumb").textContent = currentPath;
     }
 
     /**
@@ -207,13 +237,6 @@
         }
 
         lastClickedIndex = currentIndex;
-    }
-
-    /**
-     *  Updates the breadcrumb in the page to match the current path.
-     */
-    function updateBreadcrumb() {
-        document.getElementById("breadcrumb").textContent = currentPath;
     }
 
     /**
