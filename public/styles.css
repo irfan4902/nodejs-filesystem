@@ -23,7 +23,25 @@ table {
     width: 100%;
     padding: 5px;
     border-radius: 5px;
+    background-color: white;
+    box-shadow: 0px 0px 10px 0px rgba(0,0,0,0.1);
+    text-align: center;
 }
+
+thead {
+    display: table-header-group;
+    vertical-align: middle;
+    border-color: inherit;
+}
+
+th:hover {
+    cursor: pointer;
+}
+
+th:hover .arrow {
+    opacity: 1;
+}
+
 
 .container {
     width: 80%;
@@ -43,14 +61,6 @@ table {
     opacity: 0;
 }
 
-th:hover {
-    cursor: pointer;
-}
-
-th:hover .arrow {
-    opacity: 1;
-}
-
 .limit {
     float: right;
     margin-right: 5px;
@@ -58,4 +68,27 @@ th:hover .arrow {
 
 .limit > input {
     width: 40px;
+}
+
+ul.breadcrumb {
+    padding: 10px 16px;
+    list-style: none;
+}
+
+ul.breadcrumb li {
+    display: inline;
+}
+
+ul.breadcrumb li+li:before {
+    padding: 8px;
+    color: black;
+    content: "/\00a0";
+}
+
+a {
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
 }

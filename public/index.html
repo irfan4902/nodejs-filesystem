@@ -10,9 +10,9 @@
 
     <h2>File System</h2>
 
-    <a href="#" onclick="goHome()">Home</a>
+    <ul id="breadcrumb" class="breadcrumb">
 
-    <p id="breadcrumb"></p>
+    </ul>
 
     <button class="btn_prev" onclick="changePage(-1)">Previous</button>
     <button class="btn_next" onclick="changePage(1)">Next</button>
@@ -111,16 +111,27 @@
         updateUI(data);
     }
 
+    // Remove last directory from path
+    function removeOneDir(path) {
+        const pathParts = path.split('/');
+        return pathParts.slice(0, -1).join('/');
+    }
+
     /**
      * Change the directory to the parent directory of the current path
      * */
     async function goUp() {
-        // Remove last directory from path
-        const pathParts = currentPath.split('/');
-        const newPath = pathParts.slice(0, -1).join('/');
+        const newPath = removeOneDir(currentPath);
         currentPath = newPath;
         page = 1;
         const data = await fetchData(baseURL + `/dir?url=${newPath}&page=${page}&limit=${limitInput.value}`);
+        updateUI(data);
+    }
+
+    async function goTo(path) {
+        currentPath = path;
+        page = 1;
+        const data = await fetchData(baseURL + `/dir?url=${path}&page=${page}&limit=${limitInput.value}`);
         updateUI(data);
     }
 
@@ -219,7 +230,22 @@
      *  Updates the breadcrumb in the page to match the current path.
      */
     function updateBreadcrumb() {
-        document.getElementById("breadcrumb").textContent = currentPath;
+        let breadcrumb = document.getElementById("breadcrumb");
+
+        breadcrumb.innerHTML = '';
+
+        let paths = currentPath.split('/');
+
+        for (let i = 0; i < paths.length; i++) {
+
+            let p = currentPath;
+
+            for (let j = paths.length - 1; j > i; j--) {
+                p = removeOneDir(p);
+            }
+
+            breadcrumb.innerHTML += `<li><a href="#" onclick="goTo('${p}')">${paths[i]}</a></li>`;
+        }
     }
 
     /**
