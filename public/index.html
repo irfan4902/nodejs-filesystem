@@ -16,6 +16,14 @@
 
     <button class="btn_prev" onclick="changePage(-1)">Previous</button>
     <button class="btn_next" onclick="changePage(1)">Next</button>
+
+    <span style="float:right;" id="txt_page">Page: </span>
+
+    <span class="limit">
+        <label for="input_limit">Limit: </label>
+        <input type="number" min="1" id="input_limit" oninput="updateLimit()">
+    </span>
+
     <br><br>
 
     <table id="file-table">
@@ -39,7 +47,7 @@
                 Size
                 <img id="img_size" class="arrow" src="img/expand_less.png">
             </th>
-            <th>Action</th>
+            <th style="cursor: default">Action</th>
         </tr>
         </thead>
 
@@ -52,14 +60,6 @@
     <br>
     <button class="btn_prev" onclick="changePage(-1)">Previous</button>
     <button class="btn_next" onclick="changePage(1)">Next</button>
-
-    <span style="float:right;" id="txt_page">Page: </span>
-
-    <span class="limit">
-        <label for="input_limit">Limit: </label>
-        <input type="number" id="input_limit">
-    </span>
-
 
     <br>
     <br>
@@ -81,18 +81,8 @@
 
     let lastClickedIndex = -1;
     let page = 1;
-
     const limitInput = document.getElementById("input_limit");
-    const limitObject = {};
-    Object.defineProperty(limitObject, "limit", {
-        get(){
-            return limitInput.value;
-        },
-        set(newValue){
-            limitInput.value = newValue;
-        }
-    });
-    limitObject.limit = 3;
+    limitInput.value = "5";
 
     window.addEventListener('load', goHome);
 
@@ -107,10 +97,8 @@
     async function goHome() {
         currentPath = homeName;
         page = 1;
-        const data = await fetchData(baseURL + `/home?page=${page}&limit=${limitObject.limit}`);
-        updateTable(data);
-        updatePagination(data);
-        updateBreadcrumb();
+        const data = await fetchData(baseURL + `/home?page=${page}&limit=${limitInput.value}`);
+        updateUI(data);
     }
 
     /**
@@ -119,10 +107,8 @@
     async function changeDir(folderName) {
         currentPath = `${currentPath}/${folderName}`;
         page = 1;
-        const data = await fetchData(baseURL + `/dir?url=${currentPath}&page=${page}&limit=${limitObject.limit}`);
-        updateTable(data);
-        updatePagination(data);
-        updateBreadcrumb();
+        const data = await fetchData(baseURL + `/dir?url=${currentPath}&page=${page}&limit=${limitInput.value}`);
+        updateUI(data);
     }
 
     /**
@@ -134,10 +120,8 @@
         const newPath = pathParts.slice(0, -1).join('/');
         currentPath = newPath;
         page = 1;
-        const data = await fetchData(baseURL + `/dir?url=${newPath}&page=${page}&limit=${limitObject.limit}`);
-        updateTable(data);
-        updatePagination(data);
-        updateBreadcrumb();
+        const data = await fetchData(baseURL + `/dir?url=${newPath}&page=${page}&limit=${limitInput.value}`);
+        updateUI(data);
     }
 
     /**
@@ -146,9 +130,26 @@
      */
     async function changePage(change) {
         page += change;
-        const data = await fetchData(baseURL + `/dir?url=${currentPath}&page=${page}&limit=${limitObject.limit}`);
+        const data = await fetchData(baseURL + `/dir?url=${currentPath}&page=${page}&limit=${limitInput.value}`);
+        updateUI(data);
+    }
+
+    /**
+     * When the 'Limit' input text box is changed, update the page
+     */
+    async function updateLimit() {
+        const data = await fetchData(baseURL + `/dir?url=${currentPath}&page=${page}&limit=${limitInput.value}`);
+        updateUI(data);
+    }
+
+    /**
+     * Calls all functions that update the page
+     * @param data JSON response
+     */
+    function updateUI(data) {
         updateTable(data);
         updatePagination(data);
+        updateBreadcrumb();
     }
 
     /**
@@ -171,7 +172,7 @@
             cell1.innerHTML = item.name !== '..' ? `<input type="checkbox" value="${item.name}">` : '';
 
             if (item.name === '..') {
-                cell2.innerHTML = `<div><img class="parent" src="img/folder_up.png" onclick="goUp()"><a href="#" onclick="goUp()">[parent directory]</a></div>`;
+                cell2.innerHTML = `<div><img class="parent_icon" src="img/folder_up.png" onclick="goUp()"><a href="#" onclick="goUp()">[parent directory]</a></div>`;
             } else if (item.type === "Folder") {
                 cell2.innerHTML = `<a href="#" onclick="changeDir('${item.name}')">${item.name}</a>`;
             } else if (item.type === "File") {
@@ -205,11 +206,11 @@
      * @param data JSON response
      */
     function updatePagination(data) {
-        for (let b of nextButtons) {
-            b.disabled = !data.hasOwnProperty("next");
+        for (let button of nextButtons) {
+            button.disabled = !data.hasOwnProperty("next");
         }
-        for (let b of prevButtons) {
-            b.disabled = !data.hasOwnProperty("prev");
+        for (let button of prevButtons) {
+            button.disabled = !data.hasOwnProperty("prev");
         }
         pageText.innerHTML = `Page: ${page}/${data.totalPages}`;
     }
