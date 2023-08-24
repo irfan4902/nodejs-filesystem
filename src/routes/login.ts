@@ -4,8 +4,8 @@ import {viewPath} from "../app";
 
 const router = express.Router();
 
-router.get('/', (req, res) => {
-    res.sendFile(path.join(viewPath, 'index.html'));
+router.get('/login', (req, res) => {
+    res.sendFile(path.join(viewPath, 'login.html'));
 });
 
 export default router;

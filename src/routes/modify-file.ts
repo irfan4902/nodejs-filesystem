@@ -4,8 +4,8 @@ import {viewPath} from "../app";
 
 const router = express.Router();
 
-router.get('/', (req, res) => {
-    res.sendFile(path.join(viewPath, 'index.html'));
+router.get('/modify-file', (req, res) => {
+    res.sendFile(path.join(viewPath, 'modify-file.html'));
 });
 
 export default router;
