@@ -1,0 +1,195 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f0f0f0;
+}
+
+.container {
+    width: 100%;
+    margin: 0 auto;
+    padding: 30px;
+}
+
+h2 {
+    color: #333;
+}
+
+form {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 5px;
+    box-shadow: 0px 0px 10px 0px rgba(0,0,0,0.1);
+}
+
+input[type="submit"] {
+    background-color: #008CBA; /* Blue */
+    border: none;
+    color: white;
+    padding: 15px 32px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    margin: 4px 2px;
+    cursor: pointer;
+    transition-duration: 0.4s;
+}
+
+input[type="submit"]:hover {
+    background-color: #4CAF50; /* Green */
+    color: white;
+}
+
+label {
+    display: block;
+    margin-bottom: 10px;
+}
+
+input, textarea {
+    width: 100%;
+    padding: 12px 20px;
+    margin: 8px 0;
+    box-sizing: border-box;
+    border: 3px solid #ccc;
+    -webkit-transition: 0.5s;
+    transition: 0.5s;
+    outline: none;
+}
+
+input:focus, textarea:focus {
+    border: 3px solid #555;
+}
+.box {
+    width: 40%;
+    float: left;
+    padding: 10px;
+    margin: 5px;
+    background-color: white;
+    -webkit-border-radius: 5px;
+    box-shadow: 0px 2px 10px #333333;
+    text-align: center;
+    font-size: 30px;
+}
+
+table, th, td {
+    background-color: white;
+    box-shadow: 0px 0px 10px 0px rgba(0,0,0,0.1);
+    text-align: center;
+}
+
+td:nth-child(2){
+    text-align: left;
+}
+
+table {
+    width: 100%;
+    padding: 5px;
+    border-radius: 5px;
+}
+
+body {
+    font-family: 'Arial', sans-serif;
+    background-color: #f4f4f4;
+    margin: 0;
+    padding: 0;
+    color: #333;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+.container {
+    background-color: #fff;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    padding: 40px;
+    border-radius: 8px;
+    width: 80%;
+    max-width: 800px;
+}
+
+.dashboard-title {
+    text-align: center;
+    margin-bottom: 30px;
+    font-weight: bold;
+    font-size: 24px;
+}
+
+.box-container {
+    display: flex;
+    justify-content: space-between;
+}
+
+.box {
+    background-color: #eee;
+    padding: 20px;
+    border-radius: 8px;
+    text-align: center;
+    margin: 15px 20px;  /* This line adds a 20px space on the left and right of each box */
+    flex: 1;  /* This makes the boxes grow to fit the available space */
+    transition: background-color 0.3s ease;
+}
+
+.box:hover {
+    background-color: #ddd;
+}
+
+.box-image {
+    width: 80px;
+    margin-bottom: 15px;
+}
+
+.box-link {
+    color: #3498db;
+    text-decoration: none;
+    font-weight: bold;
+    font-size: 18px;
+}
+
+.box-link:hover {
+    text-decoration: underline;
+}
+
+
+/* ... existing styles ... */
+
+#table {
+    font-size: 14px; /* You can adjust this size as per your preference */
+    border-collapse: collapse; /* Merges borders */
+    width: 100%; /* This will ensure your table spans the width of the container */
+}
+
+#table th, #table td {
+    padding: 8px 12px; /* Adding padding to cells for better spacing */
+    border: 1px solid #ddd; /* A soft border for each cell for better distinction */
+}
+
+#table th {
+    background-color: #f2f2f2; /* A light background for the table headers */
+}
+
+#table tr:hover {
+    background-color: #f5f5f5; /* Highlighting rows on hover */
+}
+
+p {
+    margin: 0; /* Removing default paragraph margin, as it might look odd in tables */
+    word-wrap: break-word; /* Breaking words in case the content is too long for the cell */
+}
+
+
+/* ... existing styles ... */
+/* ... your existing styles ... */
+
+.site-footer {
+    background-color: #2c3e50;
+    color: #ecf0f1;
+    padding: 15px 0;
+    text-align: center;
+    border-top: 1px solid #34495e;
+    width: 100%;
+}
+
+.site-footer p {
+    margin: 5px 0; /* Top and bottom margin for each paragraph in the footer */
+}

@@ -1,9 +1,189 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
+
 <head>
-    <title>Express</title>
+    <title>SQL Jobs Dashboard</title>
+    <link href="/css/style.css" rel="stylesheet">
 </head>
+
 <body>
-<h1>THIS IS JOBS.HTML</h1>
+
+<div class="container">
+
+    <!-- Start of Navigation Bar -->
+    <nav>
+        <h1>SQL Jobs Dashboard</h1>
+        <a href="/">Dashboard Home</a>
+    </nav>
+    <!-- End of Navigation Bar -->
+
+    <div>
+        <h2>Jobs</h2>
+
+        <table id="jobs-table">
+            <thead>
+            <tr>
+                <th>Job Name</th>
+                <th>Action</th>
+            </tr>
+            </thead>
+            <tbody id="jobs-list">
+            <!-- Jobs will be populated here by the JavaScript -->
+            </tbody>
+        </table>
+    </div>
+
+    <div>
+        <h2>SQL Job Execution Logs</h2>
+        <table id="job-log-table">
+            <thead>
+            <tr>
+                <th>Job Name</th>
+                <th>Start Date and Time</th>
+                <th>Completed Date and Time</th>
+            </tr>
+            </thead>
+            <tbody id="job-log-list">
+            <!-- Job logs will be populated here by the JavaScript -->
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        function formatDate(input) {
+            const date = new Date(input);
+
+            // Extracting Date parts
+            const day = String(date.getUTCDate()).padStart(2, '0');
+            const month = String(date.getUTCMonth() + 1).padStart(2, '0');
+            const year = date.getUTCFullYear();
+
+            // Extracting Time parts
+            let hours = date.getUTCHours();
+            const minutes = String(date.getUTCMinutes()).padStart(2, '0');
+            const seconds = String(date.getUTCSeconds()).padStart(2, '0');
+            const ampm = hours >= 12 ? 'PM' : 'AM';
+
+            hours = hours % 12;
+            hours = hours ? hours : 12; // the hour '0' should be '12'
+            hours = String(hours).padStart(2, '0');
+
+            return `${day}-${month}-${year} ${hours}:${minutes}:${seconds} ${ampm}`;
+        }
+
+
+        fetch('/get-jobs')
+            .then(response => response.json())
+            .then(jobs => {
+                const jobsList = document.getElementById('jobs-list');
+                jobs.forEach(job => {
+                    const jobRow = document.createElement('tr');
+
+                    const jobNameCell = document.createElement('td');
+                    jobNameCell.textContent = job.name;
+                    jobRow.appendChild(jobNameCell);
+
+                    const actionCell = document.createElement('td');
+                    const triggerButton = document.createElement('button');
+                    triggerButton.textContent = 'Trigger';
+                    triggerButton.className = 'trigger-button';
+                    triggerButton.onclick = () => {
+                        triggerJob(job.name);
+                        populateLogs();
+                    };
+                    actionCell.appendChild(triggerButton);
+                    jobRow.appendChild(actionCell);
+
+                    jobsList.appendChild(jobRow);
+                });
+            });
+
+        function triggerJob(jobName) {
+            fetch(`/trigger-sql-job?jobName=${jobName}`)
+                .then(response => {
+                    if (response.ok) {
+                        // Wait for 5 seconds before populating logs
+                        setTimeout(populateLogs, 5000);
+                    } else {
+                        console.error('Failed to trigger job');
+                    }
+                });
+        }
+
+        function populateLogs() {
+            fetch('/get-job-logs')
+                .then(response => response.json())
+                .then(logs => {
+                    const logList = document.getElementById('job-log-list');
+                    logList.innerHTML = '';  // Clear existing rows
+
+                    logs.forEach((log, index) => {
+                        const logRow = document.createElement('tr');
+
+                        if (index === 0) {
+                            logRow.classList.add('highlighted');  // Highlight the latest log
+                        }
+
+                        const jobNameCell = document.createElement('td');
+                        jobNameCell.textContent = log.name;
+                        logRow.appendChild(jobNameCell);
+
+                        const startDateTimeCell = document.createElement('td');
+                        startDateTimeCell.textContent = formatDate(log.start_date_time);
+                        logRow.appendChild(startDateTimeCell);
+
+                        const endDateTimeCell = document.createElement('td');
+                        endDateTimeCell.textContent = formatDate(log.end_date_time);
+                        logRow.appendChild(endDateTimeCell);
+
+                        logList.appendChild(logRow);
+                    });
+                });
+        }
+
+        // Populate the logs when the page loads
+        populateLogs();
+    </script>
+
+    <style>
+        .trigger-button {
+            background-color: #008CBA;
+            /* Blue */
+            border: none;
+            color: white;
+            padding: 8px 15px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 14px;
+            margin: 2px;
+            cursor: pointer;
+            transition-duration: 0.4s;
+            border-radius: 5px;
+        }
+
+        .trigger-button:hover {
+            background-color: #4CAF50;
+            /* Green */
+            color: white;
+        }
+
+        #jobs-table td:nth-child(2) {  /* Targets the 2nd column of the table */
+            text-align: center;
+        }
+
+        .highlighted {
+            background-color: #FFD700;
+        }
+
+        tbody tr.highlighted {
+            background-color: #FFD700;
+        }
+    </style>
+
+
+</div>
+
 </body>
+
 </html>
