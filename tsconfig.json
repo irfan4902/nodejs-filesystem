@@ -5,6 +5,9 @@
     "outDir": "./dist",
     "rootDir": "./src",
     "strict": true,
-    "esModuleInterop": true
+    "esModuleInterop": true,
+    "lib": [
+      "ES2021.String"
+    ]
   }
 }
