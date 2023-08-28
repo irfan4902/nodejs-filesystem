@@ -10,42 +10,6 @@ const router = express.Router();
 const homeName = "File System";
 const rootPath = "C:/Users/irfan.aslam/Desktop/test folder"; // Must use forward slashes
 
-// http://localhost:4000/file-system/home?filter={"type":"Folder"}
-
-// Typescript types
-type FileData = {
-    name: string;
-    date: string;
-    type: string;
-    size: number;
-    size_readable: string;
-    url: string;
-};
-
-type FilterCriteria = {
-    name?: string;
-    date?: string;
-    type?: string;
-    min_size?: number;
-    max_size?: number;
-};
-
-type SortOrder = 'asc' | 'desc';
-
-type SortTypes = 'name' | 'date' | 'type' | 'size';
-
-type PaginatedResults = {
-    results: FileData[];
-    totalPages: number;
-    next?: {
-        page: number;
-        limit: number;
-    };
-    prev?: {
-        page: number;
-        limit: number;
-    };
-};
 
 //
 //  Routes
@@ -64,7 +28,7 @@ router.get('/file-system/home', async (req, res) => {
         let sortBy = (req.query.sortBy as SortTypes) || "type";
         let sortOrder = (req.query.sortOrder as SortOrder) || "asc";
 
-        const result = await processData(page, limit, filter, sortBy, sortOrder);
+        const result = await processData("C:/Users/irfan.aslam/Desktop/test folder/random folder1", page, limit, filter, sortBy, sortOrder);
         res.status(200).json(result);
     } catch (err) {
         res.status(500).send('Internal Server Error');
@@ -76,6 +40,20 @@ router.get('/file-system/home', async (req, res) => {
 //  Functions
 //
 
+async function processData(path: string, page: number, limit: number, filter: string, sortBy: SortTypes, sortOrder: SortOrder) {
+    console.log(`page: ${page}, limit: ${limit}, filter: ${filter}, sortBy: ${sortBy}, sortOrder: ${sortOrder}`);
+
+    let data = await getData(path);
+    let filteredData = filterData(data, filter);
+    let sortedData = sortData(filteredData, sortBy, sortOrder);
+    let paginatedData = paginateData(sortedData, page, limit);
+
+    if (path !== rootPath) {
+        return addParentDirectory(path, paginatedData);
+    }
+
+    return paginatedData;
+}
 
 /**
  * Sends file data for the given directory.
@@ -126,11 +104,11 @@ function formatFileSize(bytes: number): string {
     return (bytes / (1024 * 1024 * 1024)).toFixed(2) + ' GB';
 }
 
-function filterData(model: FileData[], filter: string): FileData[] {
+function filterData(data: FileData[], filter: string): FileData[] {
 
     let criteria = JSON.parse(filter) as FilterCriteria;
 
-    return model.filter(item => {
+    return data.filter(item => {
         if (criteria.name && !item.name.includes(criteria.name)) {
             return false;
         }
@@ -164,16 +142,16 @@ function sortData(data: FileData[], sortBy: keyof FileData, sortOrder: SortOrder
     });
 }
 
-function paginateData(model: FileData[], page: number, limit: number): PaginatedResults {
+function paginateData(data: FileData[], page: number, limit: number): PaginatedResults {
     const startIndex = (page - 1) * limit;
     const endIndex = startIndex + limit;
 
     const results: PaginatedResults = {
-        results: model.slice(startIndex, endIndex),
-        totalPages: Math.ceil(model.length / limit)
+        results: data.slice(startIndex, endIndex),
+        totalPages: Math.ceil(data.length / limit)
     };
 
-    if (endIndex < model.length) {
+    if (endIndex < data.length) {
         results.next = {
             page: page + 1,
             limit: limit,
@@ -190,15 +168,63 @@ function paginateData(model: FileData[], page: number, limit: number): Paginated
     return results;
 }
 
-async function processData(page: number, limit: number, filter: string, sortBy: SortTypes, sortOrder: SortOrder) {
-    console.log(`page: ${page}, limit: ${limit}, filter: ${filter}, sortBy: ${sortBy}, sortOrder: ${sortOrder}`);
+function addParentDirectory(path: string, paginatedData: PaginatedResults): PaginatedResults {
 
-    let hi = await getData(rootPath);
-    let lol = filterData(hi, filter);
-    let lmao = sortData(lol, sortBy, sortOrder);
-    let bye = paginateData(lmao, page, limit);
+    // Remove the last directory
+    const pathParts = path.split('/');
+    const newPath = pathParts.slice(0, -1).join('/');
 
-    return bye;
+    let parentDir: FileData = {
+        name: "..",
+        date: "",
+        type: "Folder",
+        size: 0,
+        size_readable: "",
+        url: newPath.replace(rootPath, homeName)
+    }
+
+    paginatedData.results.unshift(parentDir);
+    return paginatedData;
 }
+
+
+//
+//  TypeScript types
+//
+
+
+type FileData = {
+    name: string;
+    date: string;
+    type: string;
+    size: number;
+    size_readable: string;
+    url: string;
+};
+
+type FilterCriteria = {
+    name?: string;
+    date?: string;
+    type?: string;
+    min_size?: number;
+    max_size?: number;
+};
+
+type SortOrder = 'asc' | 'desc';
+
+type SortTypes = 'name' | 'date' | 'type' | 'size';
+
+type PaginatedResults = {
+    results: FileData[];
+    totalPages: number;
+    next?: {
+        page: number;
+        limit: number;
+    };
+    prev?: {
+        page: number;
+        limit: number;
+    };
+};
 
 export default router;
