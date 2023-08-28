@@ -8,7 +8,7 @@ const router = express.Router();
 
 // Name of the root directory in the client (displayed on the breadcrumbs)
 const homeName = "File System";
-const rootPath = "C:\\Users\\irfan.aslam\\Desktop\\test folder";
+const rootPath = "C:/Users/irfan.aslam/Desktop/test folder"; // Must use forward slashes
 
 // http://localhost:4000/file-system/home?filter={"type":"Folder"}
 
@@ -29,6 +29,10 @@ type FilterCriteria = {
     min_size?: number;
     max_size?: number;
 };
+
+type SortOrder = 'asc' | 'desc';
+
+type SortTypes = 'name' | 'date' | 'type' | 'size';
 
 type PaginatedResults = {
     results: FileData[];
@@ -57,9 +61,10 @@ router.get('/file-system/home', async (req, res) => {
         let page = parseInt(req.query.page as string) || 1;
         let limit = parseInt(req.query.limit as string) || 5;
         let filter = (req.query.filter as string) || "{}";
-        let sort = (req.query.sort as string) || "";
+        let sortBy = (req.query.sortBy as SortTypes) || "type";
+        let sortOrder = (req.query.sortOrder as SortOrder) || "asc";
 
-        const result = await processData(page, limit, filter, sort);
+        const result = await processData(page, limit, filter, sortBy, sortOrder);
         res.status(200).json(result);
     } catch (err) {
         res.status(500).send('Internal Server Error');
@@ -106,7 +111,6 @@ async function getData(directory: string): Promise<FileData[]> {
         throw err;
     }
 
-    // console.log(fileData);
     return fileData;
 }
 
@@ -122,25 +126,41 @@ function formatFileSize(bytes: number): string {
     return (bytes / (1024 * 1024 * 1024)).toFixed(2) + ' GB';
 }
 
-function filterData(model: FileData[], criteria: string): FileData[] {
+function filterData(model: FileData[], filter: string): FileData[] {
 
-    let lol = JSON.parse(criteria) as FilterCriteria;
-    console.log(lol);
+    let criteria = JSON.parse(filter) as FilterCriteria;
 
     return model.filter(item => {
-        if (lol.name && !item.name.includes(lol.name)) {
+        if (criteria.name && !item.name.includes(criteria.name)) {
             return false;
         }
-        if (lol.date && !item.date.includes(lol.date)) {
+        if (criteria.date && !item.date.includes(criteria.date)) {
             return false;
         }
-        if (lol.type && item.type !== lol.type) {
+        if (criteria.type && item.type !== criteria.type) {
             return false;
         }
-        if (lol.max_size && lol.min_size && (item.size < lol.min_size || item.size > lol.max_size)) {
+        if (criteria.max_size && criteria.min_size && (item.size < criteria.min_size || item.size > criteria.max_size)) {
             return false;
         }
         return true;
+    });
+}
+
+function sortData(data: FileData[], sortBy: keyof FileData, sortOrder: SortOrder): FileData[] {
+    return data.slice().sort((a, b) => {
+        const aValue = a[sortBy];
+        const bValue = b[sortBy];
+
+        if (sortOrder === 'asc') {
+            if (aValue < bValue) return -1;
+            if (aValue > bValue) return 1;
+            return 0;
+        } else {
+            if (aValue > bValue) return -1;
+            if (aValue < bValue) return 1;
+            return 0;
+        }
     });
 }
 
@@ -170,12 +190,13 @@ function paginateData(model: FileData[], page: number, limit: number): Paginated
     return results;
 }
 
-async function processData(page: number, limit: number, filter: string, sort: string) {
-    console.log(`page: ${page}, limit: ${limit}, filter: ${filter}, sort: ${sort}`);
+async function processData(page: number, limit: number, filter: string, sortBy: SortTypes, sortOrder: SortOrder) {
+    console.log(`page: ${page}, limit: ${limit}, filter: ${filter}, sortBy: ${sortBy}, sortOrder: ${sortOrder}`);
 
     let hi = await getData(rootPath);
     let lol = filterData(hi, filter);
-    let bye = paginateData(lol, page, limit);
+    let lmao = sortData(lol, sortBy, sortOrder);
+    let bye = paginateData(lmao, page, limit);
 
     return bye;
 }
