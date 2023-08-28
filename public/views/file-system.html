@@ -65,7 +65,9 @@
 
     <br>
     <br>
-    <button style="background-color: #3498db; color: white; padding: 10px 20px; border: none; border-radius: 5px; font-size: 16px; cursor: pointer;" onclick="zipItems()">Download selected items as .zip</button>
+    <button style="background-color: #3498db; color: white; padding: 10px 20px; border: none; border-radius: 5px; font-size: 16px; cursor: pointer;"
+            onclick="zipItems()">Download selected items as .zip
+    </button>
 
 </div>
 
@@ -74,18 +76,131 @@
     const homeName = "File System";
     let currentPath = homeName;
     let page = 1;
+    let lastClickedIndex = -1;
     const limitInput = document.getElementById("input_limit");
     limitInput.value = "5";
 
     async function fetchData(url) {
-        const response = await fetch(url);
-        return response.json();
+        try {
+            const response = await fetch(baseURL + url);
+            const data = await response.json();
+            console.log(data);
+            updateUI(data);
+        } catch (error) {
+            console.error("Error fetching or processing data:", error);
+        }
+    }
+
+    async function lmao(path, page, limit, filter, sortBy, sortOrder){
+        await fetchData(`/dir?path=${path}&page=${page}&limit=${limit}&filter=${filter}&sortBy=${sortBy}&sortOrder=${sortOrder}`);
     }
 
     window.addEventListener('load', async () => {
-        const data = await fetchData(baseURL + '/home');
-        console.log(data);
+        await fetchData(`/dir?path=${homeName}`);
     });
+
+    function updateUI(data) {
+        // updateTable(data);
+        // updatePagination(data);
+        // updateBreadcrumb();
+    }
+
+    function updateTable(data) {
+        const tableBody = document.getElementById('file-table-body');
+        tableBody.innerHTML = '';
+
+        for (const item of data.results) {
+            const row = tableBody.insertRow(-1);
+            const cell1 = row.insertCell(0); // Checkboxes
+            const cell2 = row.insertCell(1); // Name
+            const cell3 = row.insertCell(2); // Date Modified
+            const cell4 = row.insertCell(3); // Type
+            const cell5 = row.insertCell(4); // Size
+            const cell6 = row.insertCell(5); // Action
+
+            // If the item name is not '..', then add a checkbox
+            cell1.innerHTML = item.name !== '..' ? `<input type="checkbox" value="${item.name}">` : '';
+
+            if (item.name === '..') {
+                cell2.innerHTML = `<div><img class="parent_icon" src="img/folder_up.png" onclick="goUp()"><a href="#" onclick="goUp()">[parent directory]</a></div>`;
+            } else if (item.type === "Folder") {
+                cell2.innerHTML = `<a href="#" onclick="changeDir('${item.name}')">${item.name}</a>`;
+            } else if (item.type === "File") {
+                cell2.innerHTML = item.name;
+            }
+
+            cell3.innerHTML = item.date;
+            cell4.innerHTML = item.type;
+
+            if (item.type === "File") {
+                cell5.innerHTML = item.size;
+                cell6.innerHTML = `<button onclick="window.location.href='/download?filepath=${item.url}'">Download</button>`;
+            }
+        }
+
+        let checkboxes = document.querySelectorAll('input[type="checkbox"]');
+
+        for (let i = 0; i < checkboxes.length; i++) {
+            const checkbox = checkboxes[i];
+            checkbox.addEventListener('click', event => handleCheckboxClick(event, i));
+        }
+    }
+
+    const nextButtons = document.getElementsByClassName("btn_next");
+    const prevButtons = document.getElementsByClassName("btn_prev");
+    const pageText = document.getElementById("txt_page");
+
+    function updatePagination(data) {
+        for (let button of nextButtons) {
+            button.disabled = !data.hasOwnProperty("next");
+        }
+        for (let button of prevButtons) {
+            button.disabled = !data.hasOwnProperty("prev");
+        }
+        pageText.innerHTML = `Page: ${page}/${data.totalPages}`;
+    }
+
+    // function updateBreadcrumb() {
+    //     let breadcrumb = document.getElementById("breadcrumb");
+    //
+    //     breadcrumb.innerHTML = '';
+    //
+    //     let paths = currentPath.split('/');
+    //
+    //     for (let i = 0; i < paths.length; i++) {
+    //
+    //         let p = currentPath;
+    //
+    //         for (let j = paths.length - 1; j > i; j--) {
+    //             p = removeOneDir(p);
+    //         }
+    //
+    //         breadcrumb.innerHTML += `<li><a href="#" onclick="goTo('${p}')">${paths[i]}</a></li>`;
+    //     }
+    // }
+    //
+    // function removeOneDir(path) {
+    //     const pathParts = path.split('/');
+    //     return pathParts.slice(0, -1).join('/');
+    // }
+
+    /**
+     * Enable shift-clicking to select multiple checkboxes at one go
+     */
+    function handleCheckboxClick(event, currentIndex) {
+        let checkboxes = document.querySelectorAll('input[type="checkbox"]');
+
+        if (event.shiftKey && lastClickedIndex !== -1) {
+            const minIndex = Math.min(currentIndex, lastClickedIndex);
+            const maxIndex = Math.max(currentIndex, lastClickedIndex);
+
+            for (let i = minIndex + 1; i < maxIndex; i++) {
+                checkboxes[i].checked = true;
+            }
+        }
+
+        lastClickedIndex = currentIndex;
+    }
 
 </script>
 

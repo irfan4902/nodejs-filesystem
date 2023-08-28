@@ -20,15 +20,17 @@ router.get('/file-system', (req, res) => {
     res.sendFile(path.join(viewPath, 'file-system.html'));
 });
 
-router.get('/file-system/home', async (req, res) => {
+router.get('/file-system/dir', async (req, res) => {
     try {
         let page = parseInt(req.query.page as string) || 1;
         let limit = parseInt(req.query.limit as string) || 5;
         let filter = (req.query.filter as string) || "{}";
         let sortBy = (req.query.sortBy as SortTypes) || "type";
         let sortOrder = (req.query.sortOrder as SortOrder) || "asc";
+        let path = (req.query.path as string) || homeName;
+        let truePath = path.replace(homeName, rootPath);
 
-        const result = await processData("C:/Users/irfan.aslam/Desktop/test folder/random folder1", page, limit, filter, sortBy, sortOrder);
+        const result = await processData(truePath, page, limit, filter, sortBy, sortOrder);
         res.status(200).json(result);
     } catch (err) {
         res.status(500).send('Internal Server Error');
@@ -41,7 +43,7 @@ router.get('/file-system/home', async (req, res) => {
 //
 
 async function processData(path: string, page: number, limit: number, filter: string, sortBy: SortTypes, sortOrder: SortOrder) {
-    console.log(`page: ${page}, limit: ${limit}, filter: ${filter}, sortBy: ${sortBy}, sortOrder: ${sortOrder}`);
+    console.log(`page: ${page}, limit: ${limit}, filter: ${filter}, sortBy: ${sortBy}, sortOrder: ${sortOrder}, path: ${path}`);
 
     let data = await getData(path);
     let filteredData = filterData(data, filter);
