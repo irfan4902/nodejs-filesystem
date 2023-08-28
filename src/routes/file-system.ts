@@ -10,13 +10,24 @@ const router = express.Router();
 const homeName = "File System";
 const rootPath = "C:\\Users\\irfan.aslam\\Desktop\\test folder";
 
+// http://localhost:4000/file-system/home?filter={"type":"Folder"}
+
 // Typescript types
 type FileData = {
     name: string;
     date: string;
     type: string;
-    size: string;
+    size: number;
+    size_readable: string;
     url: string;
+};
+
+type FilterCriteria = {
+    name?: string;
+    date?: string;
+    type?: string;
+    min_size?: number;
+    max_size?: number;
 };
 
 type PaginatedResults = {
@@ -36,6 +47,7 @@ type PaginatedResults = {
 //  Routes
 //
 
+
 router.get('/file-system', (req, res) => {
     res.sendFile(path.join(viewPath, 'file-system.html'));
 });
@@ -44,10 +56,10 @@ router.get('/file-system/home', async (req, res) => {
     try {
         let page = parseInt(req.query.page as string) || 1;
         let limit = parseInt(req.query.limit as string) || 5;
-        let search = (req.query.search as string) || "";
+        let filter = (req.query.filter as string) || "{}";
         let sort = (req.query.sort as string) || "";
 
-        const result = await processData(page, limit, search, sort);
+        const result = await processData(page, limit, filter, sort);
         res.status(200).json(result);
     } catch (err) {
         res.status(500).send('Internal Server Error');
@@ -80,7 +92,8 @@ async function getData(directory: string): Promise<FileData[]> {
                 name: itemName,
                 date: stats.mtime.toLocaleString(),
                 type: stats.isFile() ? "File" : "Folder",
-                size: formatFileSize(stats.size),
+                size: stats.size,
+                size_readable: formatFileSize(stats.size),
                 url: filePath.replaceAll('\\', '/').replace(rootPath, homeName)
             }
         });
@@ -93,7 +106,7 @@ async function getData(directory: string): Promise<FileData[]> {
         throw err;
     }
 
-    console.log(fileData);
+    // console.log(fileData);
     return fileData;
 }
 
@@ -107,6 +120,28 @@ function formatFileSize(bytes: number): string {
     if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(2) + ' KB';
     if (bytes < 1024 * 1024 * 1024) return (bytes / (1024 * 1024)).toFixed(2) + ' MB';
     return (bytes / (1024 * 1024 * 1024)).toFixed(2) + ' GB';
+}
+
+function filterData(model: FileData[], criteria: string): FileData[] {
+
+    let lol = JSON.parse(criteria) as FilterCriteria;
+    console.log(lol);
+
+    return model.filter(item => {
+        if (lol.name && !item.name.includes(lol.name)) {
+            return false;
+        }
+        if (lol.date && !item.date.includes(lol.date)) {
+            return false;
+        }
+        if (lol.type && item.type !== lol.type) {
+            return false;
+        }
+        if (lol.max_size && lol.min_size && (item.size < lol.min_size || item.size > lol.max_size)) {
+            return false;
+        }
+        return true;
+    });
 }
 
 function paginateData(model: FileData[], page: number, limit: number): PaginatedResults {
@@ -135,9 +170,14 @@ function paginateData(model: FileData[], page: number, limit: number): Paginated
     return results;
 }
 
-async function processData(page: number, limit: number, search: string, sort: string) {
-    console.log(`page: ${page}, limit: ${limit}, search: ${search}, sort: ${sort}`);
-    return paginateData(await getData(rootPath), page, limit);
+async function processData(page: number, limit: number, filter: string, sort: string) {
+    console.log(`page: ${page}, limit: ${limit}, filter: ${filter}, sort: ${sort}`);
+
+    let hi = await getData(rootPath);
+    let lol = filterData(hi, filter);
+    let bye = paginateData(lol, page, limit);
+
+    return bye;
 }
 
 export default router;
