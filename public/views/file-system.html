@@ -8,7 +8,7 @@
 
 <div class="container">
 
-    <h2>File System</h2>
+    <h2 id="title"></h2>
 
     <a href="/">Dashboard Home</a>
 
@@ -35,19 +35,19 @@
             <th></th>
             <th style="width:50%;" onclick="sortTable('name')">
                 Name
-                <img id="img_name" class="arrow" src="img/expand_less.png">
+                <img id="img_name" class="arrow" src="../img/expand_less.png">
             </th>
             <th style="width:25%" onclick="sortTable('date')">
                 Date Modified
-                <img id="img_date" class="arrow" src="img/expand_less.png">
+                <img id="img_date" class="arrow" src="../img/expand_less.png">
             </th>
             <th onclick="sortTable('type')">
                 Type
-                <img id="img_type" class="arrow" src="img/expand_less.png">
+                <img id="img_type" class="arrow" src="../img/expand_less.png">
             </th>
             <th onclick="sortTable('size')">
                 Size
-                <img id="img_size" class="arrow" src="img/expand_less.png">
+                <img id="img_size" class="arrow" src="../img/expand_less.png">
             </th>
             <th style="cursor: default">Action</th>
         </tr>
@@ -73,36 +73,82 @@
 
 <script>
     const baseURL = "http://localhost:4000/file-system";
-    const homeName = "File System";
-    let currentPath = homeName;
-    let page = 1;
-    let lastClickedIndex = -1;
-    const limitInput = document.getElementById("input_limit");
-    limitInput.value = "5";
+    let homeName = '';
 
-    async function fetchData(url) {
+    let currentPath = homeName; // Path
+    let page = 1; // Page
+    const limitInput = document.getElementById("input_limit");
+    limitInput.value = "5"; // Limit
+    let filter = '';
+    let sortBy = 'type';
+    let sortOrder = 'dsc';
+
+    let lastClickedIndex = -1;
+
+    async function fetchData() {
         try {
+            const url = `/dir?path=${currentPath}&page=${page}&limit=${limitInput.value}&filter=${filter}&sortBy=${sortBy}&sortOrder=${sortOrder}`
             const response = await fetch(baseURL + url);
             const data = await response.json();
             console.log(data);
+            homeName = data.homeName;
+            currentPath = data.currentPath;
+            document.getElementById("title").innerHTML = homeName;
             updateUI(data);
         } catch (error) {
             console.error("Error fetching or processing data:", error);
         }
     }
 
-    async function lmao(path, page, limit, filter, sortBy, sortOrder){
-        await fetchData(`/dir?path=${path}&page=${page}&limit=${limit}&filter=${filter}&sortBy=${sortBy}&sortOrder=${sortOrder}`);
+    function changePage(change) {
+        page += change;
+        fetchData();
+    }
+
+    function sortTable(criteria) {
+        let arrow_image = document.getElementById("img_" + criteria);
+        let allImages = document.getElementsByClassName("arrow");
+
+        for (const img of allImages){
+            img.style.visibility = "hidden";
+        }
+        arrow_image.style.visibility = "visible";
+
+        if (sortBy === criteria) {
+            sortOrder = sortOrder === 'asc' ? 'dsc' : 'asc';
+        } else {
+            sortBy = criteria;
+            sortOrder = 'asc';
+        }
+
+        arrow_image.src = sortOrder === 'asc' ? "../img/expand_less.png" : "../img/expand_more.png";
+
+        fetchData();
     }
 
     window.addEventListener('load', async () => {
-        await fetchData(`/dir?path=${homeName}`);
+        await fetchData();
     });
 
+    function removeOneDir(path) {
+        const pathParts = path.split('/');
+        return pathParts.slice(0, -1).join('/');
+    }
+
+    function goUp() {
+        currentPath = removeOneDir(currentPath);
+        fetchData();
+    }
+
+    function goTo(path) {
+        currentPath = path;
+        fetchData();
+    }
+
     function updateUI(data) {
-        // updateTable(data);
-        // updatePagination(data);
-        // updateBreadcrumb();
+        updateTable(data);
+        updatePagination(data);
+        updateBreadcrumb();
     }
 
     function updateTable(data) {
@@ -122,9 +168,13 @@
             cell1.innerHTML = item.name !== '..' ? `<input type="checkbox" value="${item.name}">` : '';
 
             if (item.name === '..') {
-                cell2.innerHTML = `<div><img class="parent_icon" src="img/folder_up.png" onclick="goUp()"><a href="#" onclick="goUp()">[parent directory]</a></div>`;
+                cell2.innerHTML =
+                    `<div>
+                        <img class="parent_icon" src="../img/folder_up.png" onclick="goUp()" alt="parent directory">
+                        <a href="#" onclick="goUp()">[parent directory]</a>
+                     </div>`;
             } else if (item.type === "Folder") {
-                cell2.innerHTML = `<a href="#" onclick="changeDir('${item.name}')">${item.name}</a>`;
+                cell2.innerHTML = `<a href="#" onclick="goTo('${item.url}')">${item.name}</a>`;
             } else if (item.type === "File") {
                 cell2.innerHTML = item.name;
             }
@@ -133,7 +183,7 @@
             cell4.innerHTML = item.type;
 
             if (item.type === "File") {
-                cell5.innerHTML = item.size;
+                cell5.innerHTML = item.size_readable;
                 cell6.innerHTML = `<button onclick="window.location.href='/download?filepath=${item.url}'">Download</button>`;
             }
         }
@@ -160,29 +210,24 @@
         pageText.innerHTML = `Page: ${page}/${data.totalPages}`;
     }
 
-    // function updateBreadcrumb() {
-    //     let breadcrumb = document.getElementById("breadcrumb");
-    //
-    //     breadcrumb.innerHTML = '';
-    //
-    //     let paths = currentPath.split('/');
-    //
-    //     for (let i = 0; i < paths.length; i++) {
-    //
-    //         let p = currentPath;
-    //
-    //         for (let j = paths.length - 1; j > i; j--) {
-    //             p = removeOneDir(p);
-    //         }
-    //
-    //         breadcrumb.innerHTML += `<li><a href="#" onclick="goTo('${p}')">${paths[i]}</a></li>`;
-    //     }
-    // }
-    //
-    // function removeOneDir(path) {
-    //     const pathParts = path.split('/');
-    //     return pathParts.slice(0, -1).join('/');
-    // }
+    function updateBreadcrumb() {
+        let breadcrumb = document.getElementById("breadcrumb");
+
+        breadcrumb.innerHTML = '';
+
+        let paths = currentPath.split('/');
+
+        for (let i = 0; i < paths.length; i++) {
+
+            let p = currentPath;
+
+            for (let j = paths.length - 1; j > i; j--) {
+                p = removeOneDir(p);
+            }
+
+            breadcrumb.innerHTML += `<li><a href="#" onclick="goTo('${p}')">${paths[i]}</a></li>`;
+        }
+    }
 
     /**
      * Enable shift-clicking to select multiple checkboxes at one go

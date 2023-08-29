@@ -6,7 +6,7 @@ import {viewPath} from "../app";
 
 const router = express.Router();
 
-// Name of the root directory in the client (displayed on the breadcrumbs)
+// Name of the root directory in the client (displayed on the breadcrumbs and page title)
 const homeName = "File System";
 const rootPath = "C:/Users/irfan.aslam/Desktop/test folder"; // Must use forward slashes
 
@@ -26,7 +26,7 @@ router.get('/file-system/dir', async (req, res) => {
         let limit = parseInt(req.query.limit as string) || 5;
         let filter = (req.query.filter as string) || "{}";
         let sortBy = (req.query.sortBy as SortTypes) || "type";
-        let sortOrder = (req.query.sortOrder as SortOrder) || "asc";
+        let sortOrder = (req.query.sortOrder as SortOrder) || "dsc";
         let path = (req.query.path as string) || homeName;
         let truePath = path.replace(homeName, rootPath);
 
@@ -42,16 +42,25 @@ router.get('/file-system/dir', async (req, res) => {
 //  Functions
 //
 
+/**
+ * Function that describes the high-level logic that happens when a user makes a GET request
+ * @param path
+ * @param page
+ * @param limit
+ * @param filter
+ * @param sortBy
+ * @param sortOrder
+ */
 async function processData(path: string, page: number, limit: number, filter: string, sortBy: SortTypes, sortOrder: SortOrder) {
     console.log(`page: ${page}, limit: ${limit}, filter: ${filter}, sortBy: ${sortBy}, sortOrder: ${sortOrder}, path: ${path}`);
 
     let data = await getData(path);
     let filteredData = filterData(data, filter);
     let sortedData = sortData(filteredData, sortBy, sortOrder);
-    let paginatedData = paginateData(sortedData, page, limit);
+    let paginatedData = paginateData(sortedData, path, page, limit);
 
     if (path !== rootPath) {
-        return addParentDirectory(path, paginatedData);
+        return addParentDirectory(paginatedData, path);
     }
 
     return paginatedData;
@@ -144,13 +153,15 @@ function sortData(data: FileData[], sortBy: keyof FileData, sortOrder: SortOrder
     });
 }
 
-function paginateData(data: FileData[], page: number, limit: number): PaginatedResults {
+function paginateData(data: FileData[], path: string, page: number, limit: number): PaginatedResults {
     const startIndex = (page - 1) * limit;
     const endIndex = startIndex + limit;
 
     const results: PaginatedResults = {
         results: data.slice(startIndex, endIndex),
-        totalPages: Math.ceil(data.length / limit)
+        totalPages: Math.ceil(data.length / limit),
+        currentPath: path.replace(rootPath, homeName),
+        homeName: homeName
     };
 
     if (endIndex < data.length) {
@@ -170,7 +181,7 @@ function paginateData(data: FileData[], page: number, limit: number): PaginatedR
     return results;
 }
 
-function addParentDirectory(path: string, paginatedData: PaginatedResults): PaginatedResults {
+function addParentDirectory(paginatedData: PaginatedResults, path: string): PaginatedResults {
 
     // Remove the last directory
     const pathParts = path.split('/');
@@ -212,13 +223,15 @@ type FilterCriteria = {
     max_size?: number;
 };
 
-type SortOrder = 'asc' | 'desc';
+type SortOrder = 'asc' | 'dsc';
 
 type SortTypes = 'name' | 'date' | 'type' | 'size';
 
 type PaginatedResults = {
     results: FileData[];
     totalPages: number;
+    currentPath: string;
+    homeName: string;
     next?: {
         page: number;
         limit: number;

@@ -59,6 +59,7 @@ th:hover .arrow {
     float: right;
     width: 20px;
     opacity: 0;
+    visibility: hidden;
 }
 
 .limit {
