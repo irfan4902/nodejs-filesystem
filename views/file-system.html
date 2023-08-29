@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>File System</title>
+    <link rel="stylesheet" type="text/css" href="/public/css/file-system.css">
+</head>
+<body>
+
+<div class="container">
+
+    <h2 id="title"></h2>
+
+    <a href="/">Dashboard Home</a>
+
+    <ul id="breadcrumb" class="breadcrumb">
+
+    </ul>
+
+    <button class="btn_prev" onclick="changePage(-1)">Previous</button>
+    <button class="btn_next" onclick="changePage(1)">Next</button>
+
+    <span style="float:right;" id="txt_page">Page: </span>
+
+    <span class="limit">
+        <label for="input_limit">Limit: </label>
+        <input type="number" min="1" id="input_limit" oninput="fetchData()">
+    </span>
+
+    <br><br>
+
+    <table id="file-table">
+
+        <thead>
+        <tr>
+            <th>
+                <input type="checkbox" id="selectAll" onclick="selectAllItems()">
+            </th>
+
+            <th id="thead_name" class="header" style="width:50%;" onclick="sortTable('name')">
+                Name
+                <img id="img_name" class="arrow" src="/public/img/expand_less.png">
+            </th>
+
+            <th id="thead_date" class="header" style="width:25%" onclick="sortTable('date')">
+                Date Modified
+                <img id="img_date" class="arrow" src="/public/img/expand_less.png">
+            </th>
+
+            <th id="thead_type" class="header" onclick="sortTable('type')">
+                Type
+                <img id="img_type" class="arrow" src="/public/img/expand_less.png">
+            </th>
+
+            <th id="thead_size" class="header" onclick="sortTable('size')">
+                Size
+                <img id="img_size" class="arrow" src="/public/img/expand_less.png">
+            </th>
+
+            <th style="cursor: default">
+                Action
+            </th>
+        </tr>
+        </thead>
+
+        <tbody id="file-table-body"></tbody>
+
+    </table>
+
+    <br>
+    <button class="btn_prev" onclick="changePage(-1)">Previous</button>
+    <button class="btn_next" onclick="changePage(1)">Next</button>
+
+    <br>
+    <br>
+    <button class="download" onclick="zipItems()">Download selected items as .zip</button>
+
+</div>
+
+<script src="/dist/scripts/lol.js"></script>
+</body>
+</html>

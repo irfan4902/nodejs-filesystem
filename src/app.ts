@@ -9,12 +9,12 @@ import jobs from './routes/jobs';
 
 const app = express();
 const PORT = process.env.PORT || 4000;
-export const viewPath = path.join(__dirname, '../public/views');
+export const viewPath = path.join(__dirname, '../views');
 
 // Middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(express.static(path.join(__dirname, '../public')));
+app.use(express.static(path.join(__dirname, '../')));
 
 // Routes
 app.use('/', index);
