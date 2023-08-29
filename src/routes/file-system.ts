@@ -1,5 +1,5 @@
 import express from 'express';
-// import archiver from 'archiver';
+import archiver, {Archiver} from 'archiver';
 import fs from "fs";
 import path from "path";
 import {viewPath} from "../app";
@@ -37,10 +37,36 @@ router.get('/file-system/dir', async (req, res) => {
     }
 });
 
+router.get('/file-system/download', (req, res) => {
+    const filePath = (req.query.filepath as string);
+    const newPath = filePath.replace(homeName, rootPath);
+
+    if (!fs.existsSync(newPath)) {
+        res.status(404).send("File not found");
+        return;
+    }
+
+    console.log(`Downloading file: ${newPath}`);
+    res.download(newPath);
+});
+
+router.get('/file-system/zip', async (req, res) => {
+    const fileList = (req.query.files as string).split(',');
+    console.log("Downloading files as zip:");
+    console.log(fileList);
+
+    const zip = archiver('zip', {zlib: {level: 9}});  // Set the compression level
+    await addStuffToZip(zip, fileList);
+    await zip.finalize();
+    zip.pipe(res);
+    res.attachment('NLF-Files.zip');
+});
+
 
 //
 //  Functions
 //
+
 
 /**
  * Function that describes the high-level logic that happens when a user makes a GET request
@@ -66,10 +92,6 @@ async function processData(path: string, page: number, limit: number, filter: st
     return paginatedData;
 }
 
-/**
- * Sends file data for the given directory.
- * @param {string} directory - Directory path
- */
 async function getData(directory: string): Promise<FileData[]> {
     const fileData: FileData[] = [];
 
@@ -103,11 +125,6 @@ async function getData(directory: string): Promise<FileData[]> {
     return fileData;
 }
 
-/**
- * Formats file size for better readability.
- * @param {number} bytes - File size in bytes
- * @returns {string} - Formatted file size
- */
 function formatFileSize(bytes: number): string {
     if (bytes < 1024) return bytes + ' B';
     if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(2) + ' KB';
@@ -198,6 +215,31 @@ function addParentDirectory(paginatedData: PaginatedResults, path: string): Pagi
 
     paginatedData.results.unshift(parentDir);
     return paginatedData;
+}
+
+async function addStuffToZip(zip: Archiver, listOfItems: string[]) {
+    for (let item of listOfItems) {
+        let itemName = path.basename(item);
+        let itemPath = item.replace(homeName, rootPath);
+
+        try {
+            const stats = await fs.promises.stat(itemPath);
+
+            if (stats.isFile()) {
+                console.log(`Adding file ${itemName} to archive.`);
+                zip.append(fs.createReadStream(itemPath), {name: itemName});
+            }
+            else if (stats.isDirectory()) {
+                console.log(`Adding folder ${itemName} to archive.`);
+                zip.directory(itemPath, itemName);
+            }
+            else {
+                console.error(`Error: Path is neither a file nor a directory: ${itemName}`);
+            }
+        } catch (err) {
+            console.error('Error:', err);
+        }
+    }
 }
 
 

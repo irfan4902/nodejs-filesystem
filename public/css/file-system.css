@@ -59,7 +59,6 @@ th:hover .arrow {
     float: right;
     width: 20px;
     opacity: 0;
-    visibility: hidden;
 }
 
 .limit {
@@ -92,4 +91,14 @@ a {
 
 a:hover {
     text-decoration: underline;
+}
+
+.download {
+    background-color: #3498db;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+    cursor: pointer;
 }

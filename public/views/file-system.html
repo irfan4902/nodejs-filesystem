@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <title>File System</title>
-    <link rel="stylesheet" type="text/css" href="css/file-system.css">
+    <link rel="stylesheet" type="text/css" href="../css/file-system.css">
 </head>
 <body>
 
@@ -23,7 +23,7 @@
 
     <span class="limit">
         <label for="input_limit">Limit: </label>
-        <input type="number" min="1" id="input_limit" oninput="updateLimit()">
+        <input type="number" min="1" id="input_limit" oninput="fetchData()">
     </span>
 
     <br><br>
@@ -32,30 +32,37 @@
 
         <thead>
         <tr>
-            <th></th>
-            <th style="width:50%;" onclick="sortTable('name')">
+            <th>
+                <input type="checkbox" id="selectAll" onclick="selectAllItems()">
+            </th>
+
+            <th id="thead_name" class="header" style="width:50%;" onclick="sortTable('name')">
                 Name
                 <img id="img_name" class="arrow" src="../img/expand_less.png">
             </th>
-            <th style="width:25%" onclick="sortTable('date')">
+
+            <th id="thead_date" class="header" style="width:25%" onclick="sortTable('date')">
                 Date Modified
                 <img id="img_date" class="arrow" src="../img/expand_less.png">
             </th>
-            <th onclick="sortTable('type')">
+
+            <th id="thead_type" class="header" onclick="sortTable('type')">
                 Type
                 <img id="img_type" class="arrow" src="../img/expand_less.png">
             </th>
-            <th onclick="sortTable('size')">
+
+            <th id="thead_size" class="header" onclick="sortTable('size')">
                 Size
                 <img id="img_size" class="arrow" src="../img/expand_less.png">
             </th>
-            <th style="cursor: default">Action</th>
+
+            <th style="cursor: default">
+                Action
+            </th>
         </tr>
         </thead>
 
-        <tbody id="file-table-body">
-
-        </tbody>
+        <tbody id="file-table-body"></tbody>
 
     </table>
 
@@ -65,18 +72,15 @@
 
     <br>
     <br>
-    <button style="background-color: #3498db; color: white; padding: 10px 20px; border: none; border-radius: 5px; font-size: 16px; cursor: pointer;"
-            onclick="zipItems()">Download selected items as .zip
-    </button>
+    <button class="download" onclick="zipItems()">Download selected items as .zip</button>
 
 </div>
 
 <script>
-    const baseURL = "http://localhost:4000/file-system";
+    const baseURL = window.location.origin + '/file-system';
     let homeName = '';
-
-    let currentPath = homeName; // Path
-    let page = 1; // Page
+    let currentPath = '';
+    let page = 1;
     const limitInput = document.getElementById("input_limit");
     limitInput.value = "5"; // Limit
     let filter = '';
@@ -85,19 +89,34 @@
 
     let lastClickedIndex = -1;
 
+    window.addEventListener('load', async () => {
+        await fetchData();
+    });
+
     async function fetchData() {
         try {
             const url = `/dir?path=${currentPath}&page=${page}&limit=${limitInput.value}&filter=${filter}&sortBy=${sortBy}&sortOrder=${sortOrder}`
             const response = await fetch(baseURL + url);
             const data = await response.json();
-            console.log(data);
+
             homeName = data.homeName;
             currentPath = data.currentPath;
-            document.getElementById("title").innerHTML = homeName;
+
+            console.log(data);
             updateUI(data);
         } catch (error) {
             console.error("Error fetching or processing data:", error);
         }
+    }
+
+    function goTo(path) {
+        currentPath = path;
+        fetchData();
+    }
+
+    function goUp() {
+        currentPath = removeOneDir(currentPath);
+        fetchData();
     }
 
     function changePage(change) {
@@ -106,16 +125,23 @@
     }
 
     function sortTable(criteria) {
-        let arrow_image = document.getElementById("img_" + criteria);
-        let allImages = document.getElementsByClassName("arrow");
+        const arrow_image = document.getElementById("img_" + criteria);
+        const thead = document.getElementById("thead_" + criteria);
 
-        for (const img of allImages){
-            img.style.visibility = "hidden";
+        const allImages = document.getElementsByClassName("arrow");
+        const allTheads = document.getElementsByClassName("header");
+
+        for (let i = 0; i < 4; i++) {
+            allTheads[i].style.background = "white";
+            allImages[i].style.visibility = "hidden";
         }
+
         arrow_image.style.visibility = "visible";
+        thead.style.background = "rgba(52,152,219,0.2)";
 
         if (sortBy === criteria) {
             sortOrder = sortOrder === 'asc' ? 'dsc' : 'asc';
+
         } else {
             sortBy = criteria;
             sortOrder = 'asc';
@@ -126,26 +152,13 @@
         fetchData();
     }
 
-    window.addEventListener('load', async () => {
-        await fetchData();
-    });
-
     function removeOneDir(path) {
         const pathParts = path.split('/');
         return pathParts.slice(0, -1).join('/');
     }
 
-    function goUp() {
-        currentPath = removeOneDir(currentPath);
-        fetchData();
-    }
-
-    function goTo(path) {
-        currentPath = path;
-        fetchData();
-    }
-
     function updateUI(data) {
+        document.getElementById("title").innerHTML = homeName;
         updateTable(data);
         updatePagination(data);
         updateBreadcrumb();
@@ -184,7 +197,7 @@
 
             if (item.type === "File") {
                 cell5.innerHTML = item.size_readable;
-                cell6.innerHTML = `<button onclick="window.location.href='/download?filepath=${item.url}'">Download</button>`;
+                cell6.innerHTML = `<button onclick="window.location.href='${baseURL}/download?filepath=${item.url}'">Download</button>`;
             }
         }
 
@@ -233,7 +246,7 @@
      * Enable shift-clicking to select multiple checkboxes at one go
      */
     function handleCheckboxClick(event, currentIndex) {
-        let checkboxes = document.querySelectorAll('input[type="checkbox"]');
+        const checkboxes = document.querySelectorAll('input[type="checkbox"]');
 
         if (event.shiftKey && lastClickedIndex !== -1) {
             const minIndex = Math.min(currentIndex, lastClickedIndex);
@@ -245,6 +258,30 @@
         }
 
         lastClickedIndex = currentIndex;
+    }
+
+    function selectAllItems() {
+        const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+        const selectAllBox = document.getElementById("selectAll");
+
+        const isChecked = selectAllBox.checked;
+
+        for (const checkbox of checkboxes) {
+            checkbox.checked = isChecked;
+        }
+    }
+
+    function zipItems() {
+        const checkboxes = document.querySelectorAll('input[type="checkbox"]:checked');
+        const selectedItems = [];
+
+        for (let i = 0; i < checkboxes.length; i++) {
+            if (checkboxes[i].checked) {
+                selectedItems.push(`${currentPath}/${checkboxes[i].value}`);
+            }
+        }
+
+        window.location.href = `${baseURL}/zip?files=${selectedItems.join()}`;
     }
 
 </script>
