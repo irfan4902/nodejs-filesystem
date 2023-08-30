@@ -146,9 +146,6 @@ function filterData(data: FileData[], filter: string): FileData[] {
         if (criteria.type && item.type !== criteria.type) {
             return false;
         }
-        if (criteria.max_size && criteria.min_size && (item.size < criteria.min_size || item.size > criteria.max_size)) {
-            return false;
-        }
         return true;
     });
 }
@@ -261,8 +258,6 @@ type FilterCriteria = {
     name?: string;
     date?: string;
     type?: string;
-    min_size?: number;
-    max_size?: number;
 };
 
 type SortOrder = 'asc' | 'dsc';

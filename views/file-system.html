@@ -12,21 +12,48 @@
 
     <a href="/">Dashboard Home</a>
 
-    <ul id="breadcrumb" class="breadcrumb">
+    <ul id="breadcrumb" class="breadcrumb"></ul>
 
-    </ul>
+    <div>
+        <button class="btn_prev" onclick="changePage(-1)">Previous</button>
+        <button class="btn_next" onclick="changePage(1)">Next</button>
 
-    <button class="btn_prev" onclick="changePage(-1)">Previous</button>
-    <button class="btn_next" onclick="changePage(1)">Next</button>
+        <span class="right-align" id="txt_page">Page: </span>
 
-    <span style="float:right;" id="txt_page">Page: </span>
+        <span class="right-align">
+            &nbsp;
+            <label for="input_limit">Limit: </label>
+            <input type="number" min="1" id="input_limit" oninput="fetchData()">
+            &nbsp;
+        </span>
 
-    <span class="limit">
-        <label for="input_limit">Limit: </label>
-        <input type="number" min="1" id="input_limit" oninput="fetchData()">
-    </span>
+        <button class="right-align" id="toggle_filters">Filters</button>
+    </div>
 
-    <br><br>
+
+    <div id="filter_form" class="filter" style="display: none">
+        <br>
+        <label for="filter_name">Name: </label>
+        <input type="text" min="1" id="filter_name">
+
+        &nbsp;
+        <label for="filter_date">Date Modified: </label>
+        <input type="date" min="1" id="filter_date">
+
+        &nbsp;
+        <input type="checkbox" id="filter_files">
+        <label for="filter_files">Files</label>
+
+        &nbsp;
+        <input type="checkbox" id="filter_folders">
+        <label for="filter_folders">Folders</label>
+
+        &nbsp;
+        <button id="filter_apply" onclick="getFilter()">Apply</button>
+        <br><br>
+    </div>
+
+    <br>
 
     <table id="file-table">
 

@@ -61,12 +61,12 @@ th:hover .arrow {
     opacity: 0;
 }
 
-.limit {
+.right-align {
     float: right;
     margin-right: 5px;
 }
 
-.limit > input {
+.right-align > input {
     width: 40px;
 }
 
@@ -102,4 +102,8 @@ a:hover {
     border-radius: 5px;
     font-size: 16px;
     cursor: pointer;
+}
+
+.filter {
+    float: right;
 }

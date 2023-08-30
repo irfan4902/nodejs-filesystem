@@ -15,6 +15,62 @@ window.addEventListener('load', async () => {
     await fetchData();
 });
 
+function convertDateFormat(inputDate: string) {
+    const parts = inputDate.split('/');
+    if (parts.length !== 3) {
+        throw new Error('Invalid date format');
+    }
+
+    const year = parts[0];
+    const month = parts[1];
+    const day = parts[2];
+
+    if (day.length !== 2 || month.length !== 2 || year.length !== 4) {
+        throw new Error('Invalid date format');
+    }
+
+    return `${day}/${month}/${year}`;
+}
+
+function getFilter() {
+    const filter_name = (document.getElementById("filter_name") as HTMLInputElement).value;
+    const filter_date = (document.getElementById("filter_date") as HTMLInputElement).value;
+    const filter_files = (document.getElementById("filter_files") as HTMLInputElement).checked;
+    const filter_folders = (document.getElementById("filter_folders") as HTMLInputElement).checked;
+    console.log(`name: ${filter_name}, date: ${filter_date}, files: ${filter_files}, folders: ${filter_folders}`);
+
+    let type: string;
+    let date: string;
+
+    if (filter_files && !filter_folders) {
+        type = "File"
+    } else if (!filter_files && filter_folders) {
+        type = "Folder"
+    } else {
+        type = ''
+    }
+
+    if (filter_date) {
+        date = convertDateFormat(filter_date.replaceAll('-','/'));
+    } else {
+        date = ''
+    }
+
+    filter = `{"name":"${filter_name}","date":"${date}","type":"${type}"}`;
+    console.log(filter);
+    fetchData();
+}
+
+const toggleButton = document.getElementById("toggle_filters") as HTMLInputElement;
+const content = document.getElementById("filter_form") as HTMLElement;
+toggleButton.addEventListener("click", () => {
+    if (content.style.display === "none") {
+        content.style.display = "block"; // Show content
+    } else {
+        content.style.display = "none"; // Hide content
+    }
+});
+
 async function fetchData() {
     try {
         const url = `/dir?path=${currentPath}&page=${page}&limit=${limitInput.value}&filter=${filter}&sortBy=${sortBy}&sortOrder=${sortOrder}`;
