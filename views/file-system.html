@@ -34,22 +34,20 @@
     <div id="filter_form" class="filter" style="display: none">
         <br>
         <label for="filter_name">Name: </label>
-        <input type="text" min="1" id="filter_name">
+        <input type="search" min="1" id="filter_name" oninput="getFilter()">
 
         &nbsp;
         <label for="filter_date">Date Modified: </label>
-        <input type="date" min="1" id="filter_date">
+        <input type="date" min="1" id="filter_date" oninput="getFilter()">
 
         &nbsp;
-        <input type="checkbox" id="filter_files">
+        <input type="checkbox" id="filter_files" oninput="getFilter()">
         <label for="filter_files">Files</label>
 
         &nbsp;
-        <input type="checkbox" id="filter_folders">
+        <input type="checkbox" id="filter_folders" oninput="getFilter()">
         <label for="filter_folders">Folders</label>
 
-        &nbsp;
-        <button id="filter_apply" onclick="getFilter()">Apply</button>
         <br><br>
     </div>
 

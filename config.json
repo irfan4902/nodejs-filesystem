@@ -1,0 +1,13 @@
+{
+  "filesystems": {
+    "OBR File System": "C:/Users/irfan.aslam/Desktop/test folder",
+    "SDIS File System": "C:/Users/irfan.aslam/Desktop/test folder 2",
+    "DQR File System": "C:/Users/irfan.aslam/Desktop/test folder 3"
+  },
+  "users": {
+    "creditadmin": "CreditAdminRock",
+    "marketrisk": "MarketRiskRock"
+  },
+  "port": 4000,
+  "logfile": "C:/Users/irfan.aslam/Desktop/mylogfile.txt"
+}

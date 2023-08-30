@@ -15,62 +15,6 @@ window.addEventListener('load', async () => {
     await fetchData();
 });
 
-function convertDateFormat(inputDate: string) {
-    const parts = inputDate.split('/');
-    if (parts.length !== 3) {
-        throw new Error('Invalid date format');
-    }
-
-    const year = parts[0];
-    const month = parts[1];
-    const day = parts[2];
-
-    if (day.length !== 2 || month.length !== 2 || year.length !== 4) {
-        throw new Error('Invalid date format');
-    }
-
-    return `${day}/${month}/${year}`;
-}
-
-function getFilter() {
-    const filter_name = (document.getElementById("filter_name") as HTMLInputElement).value;
-    const filter_date = (document.getElementById("filter_date") as HTMLInputElement).value;
-    const filter_files = (document.getElementById("filter_files") as HTMLInputElement).checked;
-    const filter_folders = (document.getElementById("filter_folders") as HTMLInputElement).checked;
-    console.log(`name: ${filter_name}, date: ${filter_date}, files: ${filter_files}, folders: ${filter_folders}`);
-
-    let type: string;
-    let date: string;
-
-    if (filter_files && !filter_folders) {
-        type = "File"
-    } else if (!filter_files && filter_folders) {
-        type = "Folder"
-    } else {
-        type = ''
-    }
-
-    if (filter_date) {
-        date = convertDateFormat(filter_date.replaceAll('-','/'));
-    } else {
-        date = ''
-    }
-
-    filter = `{"name":"${filter_name}","date":"${date}","type":"${type}"}`;
-    console.log(filter);
-    fetchData();
-}
-
-const toggleButton = document.getElementById("toggle_filters") as HTMLInputElement;
-const content = document.getElementById("filter_form") as HTMLElement;
-toggleButton.addEventListener("click", () => {
-    if (content.style.display === "none") {
-        content.style.display = "block"; // Show content
-    } else {
-        content.style.display = "none"; // Hide content
-    }
-});
-
 async function fetchData() {
     try {
         const url = `/dir?path=${currentPath}&page=${page}&limit=${limitInput.value}&filter=${filter}&sortBy=${sortBy}&sortOrder=${sortOrder}`;
@@ -135,7 +79,7 @@ function removeOneDir(path: string): string {
     return pathParts.slice(0, -1).join('/');
 }
 
-function updateUI(data: any) {
+function updateUI(data: PaginatedResults) {
     (document.getElementById("title") as HTMLHeadingElement).innerHTML = homeName;
     updateTable(data);
     updatePagination(data);
@@ -155,7 +99,7 @@ function updateTable(data: any) {
         const cell5 = row.insertCell(4); // Size
         const cell6 = row.insertCell(5); // Action
 
-        // If the item name is not '..', then add a checkbox
+        // If the item name is not '', then add a checkbox
         cell1.innerHTML = item.name !== '..' ? `<input type="checkbox" value="${item.name}">` : '';
 
         if (item.name === '..') {
@@ -191,7 +135,7 @@ const nextButtons = document.getElementsByClassName("btn_next");
 const prevButtons = document.getElementsByClassName("btn_prev");
 const pageText = document.getElementById("txt_page") as HTMLDivElement;
 
-function updatePagination(data: any) {
+function updatePagination(data: PaginatedResults) {
     for (let button of nextButtons as any) {
         button.disabled = !data.hasOwnProperty("next");
     }
@@ -219,9 +163,6 @@ function updateBreadcrumb() {
     }
 }
 
-/**
- * Enable shift-clicking to select multiple checkboxes at one go
- */
 function handleCheckboxClick(event: MouseEvent, currentIndex: number) {
     const checkboxes = Array.from(document.querySelectorAll('input[type="checkbox"]')) as HTMLInputElement[];
 
@@ -243,7 +184,6 @@ function selectAllItems() {
 
     const isChecked = selectAllBox.checked;
 
-
     for (const checkbox of checkboxes) {
         checkbox.checked = isChecked;
     }
@@ -261,3 +201,79 @@ function zipItems() {
 
     window.location.href = `${baseURL}/zip?files=${selectedItems.join()}`;
 }
+
+function convertDateFormat(inputDate: string) {
+    const parts = inputDate.split('/');
+    if (parts.length !== 3) {
+        throw new Error('Invalid date format');
+    }
+
+    const year = parts[0];
+    const month = parts[1];
+    const day = parts[2];
+
+    if (day.length !== 2 || month.length !== 2 || year.length !== 4) {
+        throw new Error('Invalid date format');
+    }
+
+    return `${day}/${month}/${year}`;
+}
+
+function getFilter() {
+    const filter_name = (document.getElementById("filter_name") as HTMLInputElement).value;
+    const filter_date = (document.getElementById("filter_date") as HTMLInputElement).value;
+    const filter_files = (document.getElementById("filter_files") as HTMLInputElement).checked;
+    const filter_folders = (document.getElementById("filter_folders") as HTMLInputElement).checked;
+    console.log(`name: ${filter_name}, date: ${filter_date}, files: ${filter_files}, folders: ${filter_folders}`);
+
+    let type: string;
+    let date: string;
+
+    if (filter_files && !filter_folders) {
+        type = "File"
+    } else if (!filter_files && filter_folders) {
+        type = "Folder"
+    } else {
+        type = ''
+    }
+
+    if (filter_date) {
+        date = convertDateFormat(filter_date.replaceAll('-','/'));
+    } else {
+        date = ''
+    }
+
+    filter = `{"name":"${filter_name}","date":"${date}","type":"${type}"}`;
+    console.log(filter);
+    fetchData();
+}
+
+const toggleButton = document.getElementById("toggle_filters") as HTMLInputElement;
+const content = document.getElementById("filter_form") as HTMLElement;
+toggleButton.addEventListener("click", () => {
+    content.style.display = content.style.display === "none" ? "block" : "none";
+});
+
+type FileData = {
+    name: string;
+    date: string;
+    type: string;
+    size: number;
+    size_readable: string;
+    url: string;
+};
+
+type PaginatedResults = {
+    results: FileData[];
+    totalPages: number;
+    currentPath: string;
+    homeName: string;
+    next?: {
+        page: number;
+        limit: number;
+    };
+    prev?: {
+        page: number;
+        limit: number;
+    };
+};

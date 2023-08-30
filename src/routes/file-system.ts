@@ -2,7 +2,7 @@ import express from 'express';
 import archiver, {Archiver} from 'archiver';
 import fs from "fs";
 import path from "path";
-import {viewPath} from "../app";
+import {viewPath, getConfigData} from "../app";
 
 const router = express.Router();
 
@@ -10,14 +10,18 @@ const router = express.Router();
 const homeName = "File System";
 const rootPath = "C:/Users/irfan.aslam/Desktop/test folder"; // Must use forward slashes
 
+let rootPaths = {};
 
 //
 //  Routes
 //
 
 
-router.get('/file-system', (req, res) => {
+router.get('/file-system', async (req, res) => {
     res.sendFile(path.join(viewPath, 'file-system.html'));
+    let jsonData = getConfigData();
+    rootPaths = jsonData.filesystems;
+    console.log(rootPaths);
 });
 
 router.get('/file-system/dir', async (req, res) => {
