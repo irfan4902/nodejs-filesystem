@@ -47,7 +47,7 @@ function changePage(change: number) {
 }
 
 function sortTable(criteria: string) {
-    const arrow_image = document.getElementById("img_" + criteria) as HTMLElement;
+    const arrow_image = document.getElementById("img_" + criteria) as HTMLImageElement;
     const thead = document.getElementById("thead_" + criteria) as HTMLElement;
 
     const allImages = document.getElementsByClassName("arrow");
@@ -68,7 +68,7 @@ function sortTable(criteria: string) {
         sortOrder = 'asc';
     }
 
-    // @ts-ignore
+
     arrow_image.src = sortOrder === 'asc' ? "/public/img/expand_less.png" : "/public/img/expand_more.png";
 
     fetchData();
@@ -80,8 +80,7 @@ function removeOneDir(path: string): string {
 }
 
 function updateUI(data: any) {
-    // @ts-ignore
-    document.getElementById("title").innerHTML = homeName;
+    (document.getElementById("title") as HTMLHeadingElement).innerHTML = homeName;
     updateTable(data);
     updatePagination(data);
     updateBreadcrumb();
@@ -167,10 +166,9 @@ function updateBreadcrumb() {
 /**
  * Enable shift-clicking to select multiple checkboxes at one go
  */
-function handleCheckboxClick(event: Event, currentIndex: number) {
-    const checkboxes = document.querySelectorAll('input[type="checkbox"]') as NodeListOf<HTMLInputElement>;
+function handleCheckboxClick(event: MouseEvent, currentIndex: number) {
+    const checkboxes = Array.from(document.querySelectorAll('input[type="checkbox"]')) as HTMLInputElement[];
 
-    // @ts-ignore
     if (event.shiftKey && lastClickedIndex !== -1) {
         const minIndex = Math.min(currentIndex, lastClickedIndex);
         const maxIndex = Math.max(currentIndex, lastClickedIndex);
@@ -184,12 +182,12 @@ function handleCheckboxClick(event: Event, currentIndex: number) {
 }
 
 function selectAllItems() {
-    const checkboxes = document.querySelectorAll('input[type="checkbox"]') as NodeListOf<HTMLInputElement>;
+    const checkboxes = Array.from(document.querySelectorAll('input[type="checkbox"]')) as HTMLInputElement[];
     const selectAllBox = document.getElementById("selectAll") as HTMLInputElement;
 
     const isChecked = selectAllBox.checked;
 
-    // @ts-ignore
+
     for (const checkbox of checkboxes) {
         checkbox.checked = isChecked;
     }

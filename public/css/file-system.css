@@ -73,6 +73,7 @@ th:hover .arrow {
 ul.breadcrumb {
     padding: 10px 16px;
     list-style: none;
+    background-color: white;
 }
 
 ul.breadcrumb li {
