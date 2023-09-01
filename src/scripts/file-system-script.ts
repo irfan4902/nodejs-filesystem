@@ -12,17 +12,25 @@ let sortOrder: string = 'dsc';
 let lastClickedIndex: number = -1;
 
 window.addEventListener('load', async () => {
+    const queryParams = new URLSearchParams(window.location.search);
+    let bruh = queryParams.get('type') as string;
+    console.log('TYPE: ' + bruh);
+
+    currentPath = bruh;
+    homeName = bruh;
+
     await fetchData();
 });
 
 async function fetchData() {
     try {
-        const url = `/dir?path=${currentPath}&page=${page}&limit=${limitInput.value}&filter=${filter}&sortBy=${sortBy}&sortOrder=${sortOrder}`;
+        const url = `/dir?type=${homeName}&path=${currentPath}&page=${page}&limit=${limitInput.value}&filter=${filter}&sortBy=${sortBy}&sortOrder=${sortOrder}`;
+        console.log(url);
         const response = await fetch(baseURL + url);
         const data = await response.json();
 
-        homeName = data.homeName;
-        currentPath = data.currentPath;
+        // homeName = bruh;
+        // currentPath = data.currentPath;
 
         console.log(data);
         updateUI(data);
