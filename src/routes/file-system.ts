@@ -20,7 +20,7 @@ let rootPaths: any[] = [];
 
 router.get('/file-system', async (req, res) => {
     rootPaths = getConfigData().filesystems;
-    console.log("THESE ARE THE ROOT PATHS:" + JSON.stringify(rootPaths));
+    console.log("ROOT PATHS: " + JSON.stringify(rootPaths));
     res.sendFile(path.join(viewPath, 'file-system.html'));
 });
 
@@ -45,25 +45,29 @@ router.get('/file-system/dir', async (req, res) => {
 });
 
 router.get('/file-system/download', (req, res) => {
-    // const filePath = (req.query.filepath as string);
-    // const newPath = filePath.replace(homeName, rootPath);
-    //
-    // if (!fs.existsSync(newPath)) {
-    //     res.status(404).send("File not found");
-    //     return;
-    // }
-    //
-    // console.log(`Downloading file: ${newPath}`);
-    // res.download(newPath);
+    const filePath = (req.query.filepath as string);
+    const fileSystemName = (req.query.fsname as string)
+    const newPath = filePath.replace(fileSystemName, getPathByName(fileSystemName));
+
+    if (!fs.existsSync(newPath)) {
+        res.status(404).send("File not found");
+        return;
+    }
+
+    console.log(`Downloading file: ${newPath}`);
+    res.download(newPath);
 });
 
 router.get('/file-system/zip', async (req, res) => {
     const fileList = (req.query.files as string).split(',');
+    const fileSystemName = (req.query.fsname as string);
+
     console.log("Downloading files as zip:");
     console.log(fileList);
+    console.log(fileSystemName);
 
     const zip = archiver('zip', {zlib: {level: 9}});  // Set the compression level
-    await addStuffToZip(zip, fileList);
+    await addStuffToZip(zip, fileList, fileSystemName);
     await zip.finalize();
     zip.pipe(res);
     res.attachment('files.zip');
@@ -114,10 +118,6 @@ async function processData(fs_name: string, fs_root_path: string, current_path: 
 }
 
 async function getData(fs_name: string, fs_root_path: string, directory: string): Promise<FileData[]> {
-
-    console.log(`THIS IS GET DATA`);
-    console.log(`FS_NAME:${fs_name}, FS_ROOT_PATH:${fs_root_path}, DIRECTORY:${directory}`);
-
     const fileData: FileData[] = [];
 
     console.log("Current Directory:", directory);
@@ -241,27 +241,27 @@ function addParentDirectory(paginatedData: PaginatedResults, path: string, fs_na
     return paginatedData;
 }
 
-async function addStuffToZip(zip: Archiver, listOfItems: string[]) {
-    // for (let item of listOfItems) {
-    //     let itemName = path.basename(item);
-    //     let itemPath = item.replace(homeName, rootPath);
-    //
-    //     try {
-    //         const stats = await fs.promises.stat(itemPath);
-    //
-    //         if (stats.isFile()) {
-    //             console.log(`Adding file ${itemName} to archive.`);
-    //             zip.append(fs.createReadStream(itemPath), {name: itemName});
-    //         } else if (stats.isDirectory()) {
-    //             console.log(`Adding folder ${itemName} to archive.`);
-    //             zip.directory(itemPath, itemName);
-    //         } else {
-    //             console.error(`Error: Path is neither a file nor a directory: ${itemName}`);
-    //         }
-    //     } catch (err) {
-    //         console.error('Error:', err);
-    //     }
-    // }
+async function addStuffToZip(zip: Archiver, listOfItems: string[], fileSystemName: string) {
+    for (let item of listOfItems) {
+        let itemName = path.basename(item);
+        let itemPath = item.replace(fileSystemName, getPathByName(fileSystemName));
+
+        try {
+            const stats = await fs.promises.stat(itemPath);
+
+            if (stats.isFile()) {
+                console.log(`Adding file ${itemName} to archive.`);
+                zip.append(fs.createReadStream(itemPath), {name: itemName});
+            } else if (stats.isDirectory()) {
+                console.log(`Adding folder ${itemName} to archive.`);
+                zip.directory(itemPath, itemName);
+            } else {
+                console.error(`Error: Path is neither a file nor a directory: ${itemName}`);
+            }
+        } catch (err) {
+            console.error('Error:', err);
+        }
+    }
 }
 
 

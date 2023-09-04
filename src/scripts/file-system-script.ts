@@ -14,7 +14,6 @@ let lastClickedIndex: number = -1;
 window.addEventListener('load', async () => {
     const queryParams = new URLSearchParams(window.location.search);
     let bruh = queryParams.get('fsname') as string;
-    console.log('FS_NAME: ' + bruh);
 
     currentPath = bruh;
     homeName = bruh;
@@ -28,9 +27,6 @@ async function fetchData() {
         console.log(url);
         const response = await fetch(baseURL + url);
         const data = await response.json();
-
-        // homeName = bruh;
-        // currentPath = data.currentPath;
 
         console.log(data);
         updateUI(data);
@@ -127,7 +123,7 @@ function updateTable(data: any) {
 
         if (item.type === "File") {
             cell5.innerHTML = item.size_readable;
-            cell6.innerHTML = `<button onclick="window.location.href='${baseURL}/download?filepath=${item.url}'">Download</button>`;
+            cell6.innerHTML = `<button onclick="window.location.href='${baseURL}/download?fsname=${homeName}&filepath=${item.url}'">Download</button>`;
         }
     }
 
@@ -207,7 +203,7 @@ function zipItems() {
         }
     }
 
-    window.location.href = `${baseURL}/zip?files=${selectedItems.join()}`;
+    window.location.href = `${baseURL}/zip?fsname=${homeName}&files=${selectedItems.join()}`;
 }
 
 function convertDateFormat(inputDate: string) {
