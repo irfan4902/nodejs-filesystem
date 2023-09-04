@@ -19,12 +19,14 @@ let rootPaths: any[] = [];
 
 
 router.get('/file-system', async (req, res) => {
+    rootPaths = getConfigData().filesystems;
+    console.log("THESE ARE THE ROOT PATHS:" + JSON.stringify(rootPaths));
     res.sendFile(path.join(viewPath, 'file-system.html'));
 });
 
 router.get('/file-system/dir', async (req, res) => {
     try {
-        let fs_name = (req.query.type as string);
+        let fs_name = (req.query.fsname as string);
         let fs_root_path = getPathByName(fs_name);
         let path = (req.query.path as string);
         let page = parseInt(req.query.page as string) || 1;
@@ -32,6 +34,8 @@ router.get('/file-system/dir', async (req, res) => {
         let filter = (req.query.filter as string) || "{}";
         let sortBy = (req.query.sortBy as SortTypes) || "type";
         let sortOrder = (req.query.sortOrder as SortOrder) || "dsc";
+
+        console.log(`fs_name: ${fs_name}, fs_root_path: ${fs_root_path}, path: ${path}, page: ${page}, limit: ${limit}, filter: ${filter}, sortBy: ${sortBy}, sortOrder: ${sortOrder}`);
 
         const result = await processData(fs_name, fs_root_path, path, page, limit, filter, sortBy, sortOrder);
         res.status(200).json(result);
@@ -84,33 +88,36 @@ function getPathByName(nameToFind: any) {
  * Function that describes the high-level logic that happens when a user makes a GET request to /dir
  * @param fs_name
  * @param fs_root_path
- * @param path
+ * @param current_path
  * @param page
  * @param limit
  * @param filter
  * @param sortBy
  * @param sortOrder
  */
-async function processData(fs_name: string, fs_root_path: string, path: string, page: number, limit: number, filter: string, sortBy: SortTypes, sortOrder: SortOrder) {
-    console.log(`fs_name: ${fs_name}, fs_root_path: ${fs_root_path}, path: ${fs_root_path}, page: ${page}, limit: ${limit}, filter: ${filter}, sortBy: ${sortBy}, sortOrder: ${sortOrder}`);
+async function processData(fs_name: string, fs_root_path: string, current_path: string, page: number, limit: number, filter: string, sortBy: SortTypes, sortOrder: SortOrder) {
 
-    let data = await getData(fs_name, fs_root_path, path);
+    current_path = current_path.replace(fs_name, fs_root_path);
+
+    console.log(`fs_name: ${fs_name}, fs_root_path: ${fs_root_path}, TRUE CURRENT PATH: ${current_path}, page: ${page}, limit: ${limit}, filter: ${filter}, sortBy: ${sortBy}, sortOrder: ${sortOrder}`);
+
+    let data = await getData(fs_name, fs_root_path, current_path);
     let filteredData = filterData(data, filter);
     let sortedData = sortData(filteredData, sortBy, sortOrder);
-    let paginatedData = paginateData(sortedData, fs_name, fs_root_path, path, page, limit);
+    let paginatedData = paginateData(sortedData, fs_name, fs_root_path, current_path, page, limit);
 
-    // if (path !== rootPath) {
-    //     return addParentDirectory(paginatedData, path);
-    // }
-
-    if (!rootPaths.some(item => item.name === fs_root_path)) {
-        return addParentDirectory(paginatedData, path, fs_name, fs_root_path);
+    if ( !(rootPaths.some(item => item.path === current_path)) ) {
+        return addParentDirectory(paginatedData, current_path, fs_name, fs_root_path);
     }
 
     return paginatedData;
 }
 
 async function getData(fs_name: string, fs_root_path: string, directory: string): Promise<FileData[]> {
+
+    console.log(`THIS IS GET DATA`);
+    console.log(`FS_NAME:${fs_name}, FS_ROOT_PATH:${fs_root_path}, DIRECTORY:${directory}`);
+
     const fileData: FileData[] = [];
 
     console.log("Current Directory:", directory);
@@ -124,7 +131,8 @@ async function getData(fs_name: string, fs_root_path: string, directory: string)
             const stats = await fs.promises.stat(filePath);
             return {
                 name: itemName,
-                date: stats.mtime.toLocaleString(),
+                date: stats.mtime,
+                date_readable: stats.mtime.toLocaleString(),
                 type: stats.isFile() ? "File" : "Folder",
                 size: stats.size,
                 size_readable: formatFileSize(stats.size),
@@ -158,7 +166,7 @@ function filterData(data: FileData[], filter: string): FileData[] {
         if (criteria.name && !item.name.includes(criteria.name)) {
             return false;
         }
-        if (criteria.date && !item.date.includes(criteria.date)) {
+        if (criteria.date && !item.date_readable.includes(criteria.date)) {
             return false;
         }
         if (criteria.type && item.type !== criteria.type) {
@@ -221,7 +229,8 @@ function addParentDirectory(paginatedData: PaginatedResults, path: string, fs_na
 
     let parentDir: FileData = {
         name: "..",
-        date: "",
+        date_readable: "",
+        date: new Date(0),
         type: "Folder",
         size: 0,
         size_readable: "",
@@ -263,7 +272,8 @@ async function addStuffToZip(zip: Archiver, listOfItems: string[]) {
 
 type FileData = {
     name: string;
-    date: string;
+    date: Date;
+    date_readable: string;
     type: string;
     size: number;
     size_readable: string;

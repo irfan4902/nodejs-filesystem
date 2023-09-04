@@ -23,7 +23,7 @@ function addBox(name: string) {
         <div class="box">
             <img class="box-image" src="/public/img/folder.svg" alt="${name}">
             <br>
-            <a class="box-link" href="/file-system?type=${encodeURIComponent(name)}">${name}</a>
+            <a class="box-link" href="/file-system?fsname=${encodeURIComponent(name)}">${name}</a>
         </div>
     `;
 

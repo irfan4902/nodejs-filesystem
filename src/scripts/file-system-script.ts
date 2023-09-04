@@ -13,8 +13,8 @@ let lastClickedIndex: number = -1;
 
 window.addEventListener('load', async () => {
     const queryParams = new URLSearchParams(window.location.search);
-    let bruh = queryParams.get('type') as string;
-    console.log('TYPE: ' + bruh);
+    let bruh = queryParams.get('fsname') as string;
+    console.log('FS_NAME: ' + bruh);
 
     currentPath = bruh;
     homeName = bruh;
@@ -24,7 +24,7 @@ window.addEventListener('load', async () => {
 
 async function fetchData() {
     try {
-        const url = `/dir?type=${homeName}&path=${currentPath}&page=${page}&limit=${limitInput.value}&filter=${filter}&sortBy=${sortBy}&sortOrder=${sortOrder}`;
+        const url = `/dir?fsname=${homeName}&path=${currentPath}&page=${page}&limit=${limitInput.value}&filter=${filter}&sortBy=${sortBy}&sortOrder=${sortOrder}`;
         console.log(url);
         const response = await fetch(baseURL + url);
         const data = await response.json();
@@ -122,7 +122,7 @@ function updateTable(data: any) {
             cell2.innerHTML = item.name;
         }
 
-        cell3.innerHTML = item.date;
+        cell3.innerHTML = item.date_readable;
         cell4.innerHTML = item.type;
 
         if (item.type === "File") {
@@ -264,7 +264,8 @@ toggleButton.addEventListener("click", () => {
 
 type FileData = {
     name: string;
-    date: string;
+    date: Date;
+    date_readable: string;
     type: string;
     size: number;
     size_readable: string;
