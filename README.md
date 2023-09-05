@@ -1,26 +1,47 @@
 # node-system
 
 ## How to run the server
-`cd` into the node-system directory  
+`cd` into the node-system directory
 
 
-`npm install` to install dependencies  
+`npm install` to install dependencies
 
 
 `npm run build` to compile the javascript files
 
 
-`npm run start` to start the server  
+`npm run start` to start the server
 
 ## How the project is structured
 
 `src` : Contains TypeScript source files
+    
+* `src/routes`: Contains backend/server code for handling routes, http requests and API stuff.
+* `src/scripts`: Contains frontend/browser code. To add a script in a HTML file located in the `/views` directory, add this before `</body>`:
+
+ `<script src="/dist/scripts/your_script.js"></script>` 
 
 
-`dist` : Contains compiled JavaScript files (will be generated after running `npm run build`)
+* `app.ts`: The file that is run when running the command `npm run start`.
 
 
-`public` : Contains CSS stylesheets, images and other assets
+`dist` : Contains compiled JavaScript files (will be generated after running `npm run build`). It has the same structure as `src`.
 
 
-`views` : Contains HTML files (pages in the application)
+`public` : Contains CSS stylesheets, images and other assets.
+
+
+`views` : Contains HTML files (pages in the application).
+
+
+## `Config.json`
+Contains constants that are used in the application i.e. the filesystem data, user data and port number.
+
+To add a new file system, add the following line under `filesystems`: 
+
+`{ "name": "name_of_your_choice", "path": "absolute_path_to_the_folder_on_your_machine" }`
+
+
+To register a new user to the file system, add the following line under `users`:
+
+  `{ "username": "your_username", "password": "your_password" }`
