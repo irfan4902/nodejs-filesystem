@@ -6,10 +6,6 @@ import {viewPath, getConfigData} from "../app";
 
 const router = express.Router();
 
-// Name of the root directory in the client (displayed on the breadcrumbs and page title)
-// const homeName = "File System";
-// const rootPath = "C:/Users/irfan.aslam/Desktop/test folder"; // Must use forward slashes
-
 let rootPaths: any[] = [];
 
 
@@ -81,11 +77,7 @@ router.get('/file-system/zip', async (req, res) => {
 function getPathByName(nameToFind: any) {
     const item = rootPaths.find(item => item.name === nameToFind);
 
-    if (item) {
-        return item.path;
-    } else {
-        return null;
-    }
+    return item ? item.path : null;
 }
 
 /**
