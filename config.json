@@ -6,7 +6,8 @@
   ],
   "users": [
     { "username": "creditadmin", "password": "CreditAdminRock" },
-    { "username": "marketrisk", "password": "MarketRiskRock" }
+    { "username": "marketrisk", "password": "MarketRiskRock" },
+    { "username": "admin", "password": "1234" }
   ],
   "port": 4000,
   "logfile": "C:/Users/irfan.aslam/Desktop/mylogfile.txt"
