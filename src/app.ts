@@ -1,5 +1,6 @@
 import path from "path";
 import express from 'express';
+import session from 'express-session';
 
 // Import all the routes
 import index from './routes/index';
@@ -11,6 +12,13 @@ import fs from "fs/promises";
 const app = express();
 const PORT = process.env.PORT || 4000;
 export const viewPath = path.join(__dirname, '../views');
+
+// Set up session
+app.use(session({
+    secret: 'lmao-filesystem',
+    resave: false,
+    saveUninitialized: true
+}));
 
 // Middleware
 app.use(express.json());
