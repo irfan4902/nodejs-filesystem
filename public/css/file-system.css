@@ -1,130 +1,132 @@
 body {
-    font-family: Arial, sans-serif;
-    margin: 0;
-    padding: 0;
-    background-color: #f0f0f0;
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+  background-color: #f0f0f0;
 }
 
 h2 {
-    color: #333;
-    display: inline-block;
+  color: #333;
+  display: inline-block;
 }
 
 .logout {
-    float: right; 
-    display: flex; 
-    align-items: center;
-    background-color: white;
-    padding: 10px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-    border-radius: 8px;
+  float: right;
+  display: flex;
+  align-items: center;
+  background-color: white;
+  padding: 10px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
 }
 
 .logout a {
-    color: #3498db;
-    text-decoration: none;
-    font-size: 18px;
+  color: #3498db;
+  text-decoration: none;
+  font-size: 18px;
 }
 
 .logout a:hover {
-    text-decoration: underline;
+  text-decoration: underline;
 }
 
-table, th, td {
-    background-color: white;
-    box-shadow: 0px 0px 10px 0px rgba(0, 0, 0, 0.1);
-    text-align: center;
+table,
+th,
+td {
+  background-color: white;
+  box-shadow: 0px 0px 10px 0px rgba(0, 0, 0, 0.1);
+  text-align: center;
 }
 
 td:nth-child(2) {
-    text-align: left;
+  text-align: left;
 }
 
 table {
-    width: 100%;
-    padding: 5px;
-    border-radius: 5px;
-    background-color: white;
-    box-shadow: 0px 0px 10px 0px rgba(0,0,0,0.1);
-    text-align: center;
+  width: 100%;
+  padding: 5px;
+  border-radius: 5px;
+  background-color: white;
+  box-shadow: 0px 0px 10px 0px rgba(0, 0, 0, 0.1);
+  text-align: center;
 }
 
 thead {
-    display: table-header-group;
-    vertical-align: middle;
-    border-color: inherit;
+  display: table-header-group;
+  vertical-align: middle;
+  border-color: inherit;
 }
 
 th:hover {
-    cursor: pointer;
+  cursor: pointer;
 }
 
 th:hover .arrow {
-    opacity: 1;
+  opacity: 1;
 }
 
 
 .box-container {
-    width: 80%;
-    margin: 0 auto;
-    padding: 20px;
+  width: 80%;
+  margin: 0 auto;
+  padding: 20px;
 }
 
 .parent_icon {
-    width: 22px;
-    margin-bottom: -6px;
-    cursor: pointer;
+  width: 22px;
+  margin-bottom: -6px;
+  cursor: pointer;
 }
 
 .arrow {
-    float: right;
-    width: 20px;
-    opacity: 0;
+  float: right;
+  width: 20px;
+  opacity: 0;
 }
 
 .right-align {
-    float: right;
-    margin-right: 5px;
+  float: right;
+  margin-right: 5px;
 }
 
-.right-align > input {
-    width: 40px;
+.right-align>input {
+  width: 40px;
 }
 
 ul.breadcrumb {
-    padding: 10px 16px;
-    list-style: none;
-    background-color: white;
+  padding: 10px 16px;
+  list-style: none;
+  background-color: white;
 }
 
 ul.breadcrumb li {
-    display: inline;
+  display: inline;
 }
 
 ul.breadcrumb li+li:before {
-    padding: 8px;
-    color: black;
-    content: "/\00a0";
+  padding: 8px;
+  color: black;
+  content: "/\00a0";
 }
 
 a {
-    text-decoration: none;
+  text-decoration: none;
 }
 
 a:hover {
-    text-decoration: underline;
+  text-decoration: underline;
 }
 
 .download {
-    background-color: #3498db;
-    color: white;
-    padding: 10px 20px;
-    border: none;
-    border-radius: 5px;
-    font-size: 16px;
-    cursor: pointer;
+  background-color: #3498db;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  font-size: 16px;
+  cursor: pointer;
 }
 
 .filter {
-    float: right;
+  float: right;
 }

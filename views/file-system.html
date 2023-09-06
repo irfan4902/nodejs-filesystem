@@ -1,45 +1,47 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
+
+  <head>
     <title>File System</title>
     <link rel="stylesheet" type="text/css" href="/public/css/file-system.css">
-</head>
-<body>
+  </head>
 
-<div class="box-container">
+  <body>
 
-    <h2 id="title"></h2>
+    <div class="box-container">
 
-    <span class="logout">
+      <h2 id="title"></h2>
+
+      <span class="logout">
         <img src="/public/img/logout.svg">
         &nbsp;
         <a href="/logout">Logout</a>
-    </span>
+      </span>
 
-    <br>
+      <br>
 
-    <a href="/">Dashboard Home</a>
+      <a href="/">Dashboard Home</a>
 
-    <ul id="breadcrumb" class="breadcrumb"></ul>
+      <ul id="breadcrumb" class="breadcrumb"></ul>
 
-    <div>
+      <div>
         <button class="btn_prev" onclick="changePage(-1)">Previous</button>
         <button class="btn_next" onclick="changePage(1)">Next</button>
 
         <span class="right-align" id="txt_page">Page: </span>
 
         <span class="right-align">
-            &nbsp;
-            <label for="input_limit">Limit: </label>
-            <input type="number" min="1" id="input_limit" oninput="fetchData()">
-            &nbsp;
+          &nbsp;
+          <label for="input_limit">Limit: </label>
+          <input type="number" min="1" id="input_limit" oninput="fetchData()">
+          &nbsp;
         </span>
 
         <button class="right-align" id="toggle_filters">Filters</button>
-    </div>
+      </div>
 
 
-    <div id="filter_form" class="filter" style="display: none">
+      <div id="filter_form" class="filter" style="display: none">
         <br>
         <label for="filter_name">Name: </label>
         <input type="search" min="1" id="filter_name" oninput="getFilter()">
@@ -57,58 +59,59 @@
         <label for="filter_folders">Folders</label>
 
         <br><br>
-    </div>
+      </div>
 
-    <br>
+      <br>
 
-    <table id="file-table">
+      <table id="file-table">
 
         <thead>
-        <tr>
+          <tr>
             <th>
-                <input type="checkbox" id="selectAll" onclick="selectAllItems()">
+              <input type="checkbox" id="selectAll" onclick="selectAllItems()">
             </th>
 
             <th id="thead_name" class="header" style="width:50%;" onclick="sortTable('name')">
-                Name
-                <img id="img_name" class="arrow" src="/public/img/expand_less.png">
+              Name
+              <img id="img_name" class="arrow" src="/public/img/expand_less.png">
             </th>
 
             <th id="thead_date" class="header" style="width:25%" onclick="sortTable('date')">
-                Date Modified
-                <img id="img_date" class="arrow" src="/public/img/expand_less.png">
+              Date Modified
+              <img id="img_date" class="arrow" src="/public/img/expand_less.png">
             </th>
 
             <th id="thead_type" class="header" onclick="sortTable('type')">
-                Type
-                <img id="img_type" class="arrow" src="/public/img/expand_less.png">
+              Type
+              <img id="img_type" class="arrow" src="/public/img/expand_less.png">
             </th>
 
             <th id="thead_size" class="header" onclick="sortTable('size')">
-                Size
-                <img id="img_size" class="arrow" src="/public/img/expand_less.png">
+              Size
+              <img id="img_size" class="arrow" src="/public/img/expand_less.png">
             </th>
 
             <th style="cursor: default">
-                Action
+              Action
             </th>
-        </tr>
+          </tr>
         </thead>
 
         <tbody id="file-table-body"></tbody>
 
-    </table>
+      </table>
 
-    <br>
-    <button class="btn_prev" onclick="changePage(-1)">Previous</button>
-    <button class="btn_next" onclick="changePage(1)">Next</button>
+      <br>
+      <button class="btn_prev" onclick="changePage(-1)">Previous</button>
+      <button class="btn_next" onclick="changePage(1)">Next</button>
 
-    <br>
-    <br>
-    <button class="download" onclick="zipItems()">Download selected items as .zip</button>
+      <br>
+      <br>
+      <button class="download" onclick="zipItems()">Download selected items as .zip</button>
 
-</div>
+    </div>
 
-<script src="/dist/scripts/file-system-script.js"></script>
-</body>
+    <script src="/dist/scripts/file-system-script.js"></script>
+  </body>
+
 </html>

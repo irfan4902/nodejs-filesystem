@@ -1,80 +1,80 @@
 body {
-    font-family: Arial, sans-serif;
-    margin: 0;
-    padding: 0;
-    background-color: #f0f0f0;
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+  background-color: #f0f0f0;
 }
 
 h2 {
-    color: #333;
-    display: inline-block;
+  color: #333;
+  display: inline-block;
 }
 
 .logout {
-    float: right; 
-    display: flex; 
-    align-items: center;
-    background-color: white;
-    padding: 10px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-    border-radius: 8px;
+  float: right;
+  display: flex;
+  align-items: center;
+  background-color: white;
+  padding: 10px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
 }
 
 .logout a {
-    color: #3498db;
-    text-decoration: none;
-    font-size: 18px;
+  color: #3498db;
+  text-decoration: none;
+  font-size: 18px;
 }
 
 .logout a:hover {
-    text-decoration: underline;
+  text-decoration: underline;
 }
 
 .container {
-    width: 80%;
-    margin: 0 auto 0 auto;
-    padding: 20px;
+  width: 80%;
+  margin: 0 auto 0 auto;
+  padding: 20px;
 }
 
 .box-container {
-    padding: 20px;
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    background-color: #fff;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-    border-radius: 8px;
+  padding: 20px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  background-color: #fff;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
 }
 
 .box {
-    width: calc(20% - 20px);
-    margin: 10px;
-    text-align: center;
-    -webkit-border-radius: 10px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    padding: 20px;
-    background-color: #eee;
-    transition: transform 0.3s, background-color 0.3s ease;
+  width: calc(20% - 20px);
+  margin: 10px;
+  text-align: center;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+  background-color: #eee;
+  transition: transform 0.3s, background-color 0.3s ease;
 }
 
 .box:hover {
-    transform: scale(1.05);
-    background-color: #ddd;
+  transform: scale(1.05);
+  background-color: #ddd;
 }
 
 .box-image {
-    max-width: 80px;
-    height: auto;
-    margin-bottom: 10px;
+  max-width: 80px;
+  height: auto;
+  margin-bottom: 10px;
 }
 
 .box-link {
-    color: #3498db;
-    text-decoration: none;
-    font-weight: bold;
-    font-size: 18px;
+  color: #3498db;
+  text-decoration: none;
+  font-weight: bold;
+  font-size: 18px;
 }
 
 .box-link:hover {
-    text-decoration: underline;
+  text-decoration: underline;
 }

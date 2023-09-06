@@ -1,37 +1,38 @@
 <!DOCTYPE html>
 <html lang="en">
 
-<head>
+  <head>
     <title>Dashboard</title>
     <link rel="stylesheet" href="/public/css/dashboard.css">
-</head>
+  </head>
 
-<body>
+  <body>
 
-<div class="container">
+    <div class="container">
 
-    <h2>Dashboard</h2>
+      <h2>Dashboard</h2>
 
-    <span class="logout">
+      <span class="logout">
         <img src="/public/img/logout.svg">
         &nbsp;
         <a href="/logout">Logout</a>
-    </span>
-    
-    <div class="box-container" id="box-container">
+      </span>
+
+      <div class="box-container" id="box-container">
 
         <div class="box">
-            <img class="box-image" src="/public/img/cog.png" alt="SQL Jobs Dashboard"> <!-- You might want to add an appropriate icon here -->
-            <br>
-            <a class="box-link" href="/jobs">SQL Jobs Dashboard</a>
+          <img class="box-image" src="/public/img/cog.png" alt="SQL Jobs Dashboard">
+          <!-- You might want to add an appropriate icon here -->
+          <br>
+          <a class="box-link" href="/jobs">SQL Jobs Dashboard</a>
         </div>
+
+      </div>
 
     </div>
 
-</div>
+    <script src="/dist/scripts/dashboard-script.js"></script>
 
-<script src="/dist/scripts/dashboard-script.js"></script>
-
-</body>
+  </body>
 
 </html>

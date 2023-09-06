@@ -1,13 +1,31 @@
 {
   "filesystems": [
-    { "name": "OBR File System", "path": "C:/Users/irfan.aslam/Desktop/test folder" },
-    { "name": "SDIS File System", "path": "C:/Users/irfan.aslam/Desktop/test folder 2" },
-    { "name": "DQR File System", "path": "C:/Users/irfan.aslam/Desktop/test folder 3" }
+    {
+      "name": "OBR File System",
+      "path": "C:/Users/irfan.aslam/Desktop/test folder"
+    },
+    {
+      "name": "SDIS File System",
+      "path": "C:/Users/irfan.aslam/Desktop/test folder 2"
+    },
+    {
+      "name": "DQR File System",
+      "path": "C:/Users/irfan.aslam/Desktop/test folder 3"
+    }
   ],
   "users": [
-    { "username": "creditadmin", "password": "CreditAdminRock" },
-    { "username": "marketrisk", "password": "MarketRiskRock" },
-    { "username": "admin", "password": "1234" }
+    {
+      "username": "creditadmin",
+      "password": "CreditAdminRock"
+    },
+    {
+      "username": "marketrisk",
+      "password": "MarketRiskRock"
+    },
+    {
+      "username": "admin",
+      "password": "1234"
+    }
   ],
   "port": 4000,
   "logfile": "C:/Users/irfan.aslam/Desktop/mylogfile.txt"
