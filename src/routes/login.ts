@@ -1,6 +1,5 @@
 import express from 'express';
 import path from "path";
-import session from 'express-session'; 
 import {viewPath, getConfigData} from "../app";
 
 const router = express.Router();
@@ -23,17 +22,19 @@ router.post('/login', (req, res) => {
       if (storedPassword === password) {
         console.log('Correct password! :D');
 
-        //@ts-ignore
+        // @ts-ignore
         req.session.loggedin = true;
-        //@ts-ignore
+        // @ts-ignore
         req.session.username = username;
         res.redirect('/');
 
       } else {
         console.log('WRONG password!! >:(');
+        res.redirect('/login')
       }
     } else {
       console.log('User not found :(');
+      res.redirect('/login')
     }
 });
 

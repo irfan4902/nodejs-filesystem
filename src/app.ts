@@ -1,4 +1,5 @@
 import path from "path";
+import fs from "fs/promises";
 import express from 'express';
 import session from 'express-session';
 
@@ -7,7 +8,7 @@ import index from './routes/index';
 import login from './routes/login';
 import file_system from './routes/file-system';
 import jobs from './routes/jobs';
-import fs from "fs/promises";
+import logout from './routes/logout';
 
 const app = express();
 const PORT = process.env.PORT || 4000;
@@ -19,6 +20,17 @@ app.use(session({
     resave: false,
     saveUninitialized: true
 }));
+
+// @ts-ignore
+function checkLoggedIn(req, res, next) {
+    if (!req.session.loggedin) {
+        console.log('nooo not logged in');
+        res.redirect('/login');
+    } else {
+        console.log('hii already logged in');
+        next();
+    }
+}
 
 // Middleware
 app.use(express.json());
@@ -41,11 +53,14 @@ export function getConfigData() {
 }
 
 loadConfigData().then(() => {
-    // Routes
-    app.use('/', index);
-    app.use('/', login);
-    app.use('/', file_system);
-    app.use('/', jobs);
+     // Routes
+     app.use('/', login); // Apply login route without authentication check
+     app.use('/', logout);
+
+     // Apply authentication middleware to routes that require it
+     app.use('/', checkLoggedIn, index);
+     app.use('/', checkLoggedIn, file_system);
+     app.use('/', checkLoggedIn, jobs);
 
     // Start the server
     app.listen(PORT, () => {
