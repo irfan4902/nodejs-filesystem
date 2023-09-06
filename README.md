@@ -39,9 +39,23 @@ Contains constants that are used in the application i.e. the filesystem data, us
 
 To add a new file system, add the following line under `filesystems`: 
 
-`{ "name": "name_of_your_choice", "path": "absolute_path_to_the_folder_on_your_machine" }`
+```json
+"filesystems": [
+  { 
+    "name": "name_of_your_choice", 
+    "path": "absolute_path_to_the_folder_on_your_machine"
+  }
+]
+```
 
 
 To register a new user to the file system, add the following line under `users`:
 
-  `{ "username": "your_username", "password": "your_password" }`
+```json
+"users": [
+  {
+    "username": "your_username",
+    "password": "your_password"
+  }
+]
+```
