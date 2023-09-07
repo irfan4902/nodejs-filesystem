@@ -1,4 +1,4 @@
-# node-system
+# nodejs-filesystem
 
 ## How to run the server
 `cd` into the node-system directory
