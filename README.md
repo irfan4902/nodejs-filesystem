@@ -37,25 +37,34 @@
 ## `Config.json`
 Contains constants that are used in the application i.e. the filesystem data, user data and port number.
 
-To add a new file system, add the following line under `filesystems`: 
+To add a new file system, add the following under `filesystems`: 
 
 ```json
 "filesystems": [
   { 
-    "name": "name_of_your_choice", 
+    "name": "file_system_1", 
     "path": "absolute_path_to_the_folder_on_your_machine"
   }
 ]
 ```
 
+The `name` can be anything you would like to name the file system. Make sure `path` is a valid path to a folder on your machine. Do not add a `/` at the end of `path`.
 
-To register a new user to the file system, add the following line under `users`:
+To register a new user to the file system, add the following under `users`:
 
 ```json
 "users": [
   {
     "username": "your_username",
-    "password": "your_password"
+    "password": "your_password",
+    "permissions": [
+      "file_system_1",
+      "file_system_2",
+      "file_system_3"
+    ]
   }
 ]
+
 ```
+
+Under `permissions`, add the exact `name` of the file systems defined earlier in the file, under `filesystems`.
