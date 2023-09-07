@@ -2,12 +2,16 @@ import express from 'express';
 const router = express.Router();
 
 router.get('/logout', (req, res) => {
-  console.log("logging outtt");
-  // @ts-ignore
-  req.session.loggedin = false;
-  // @ts-ignore
-  req.session.username = false;
-  res.redirect('/login');
+
+  req.session.destroy((err) => {
+    if (err) {
+      res.status(500).send('Error clearing session');
+    } else {
+      res.clearCookie('connect.sid');
+      res.redirect('/login');
+    }
+  });
+
 });
 
 export default router;

@@ -1,54 +1,45 @@
 import express from 'express';
 import path from "path";
-import {viewPath, getConfigData} from "../app";
+import { view_path, getConfigData } from "../app";
 
 const router = express.Router();
 
-let userData: any[] = [];
+let user_data: any[] = [];
 
 router.get('/login', (req, res) => {
-    userData = getConfigData().users;
-    res.sendFile(path.join(viewPath, 'login.html'));
+  user_data = getConfigData().users;
+  res.sendFile(path.join(view_path, 'login.html'));
 });
+
 
 router.post('/login', (req, res) => {
-    const username = req.body.username;
-    const password = req.body.password;
-    const storedPassword = getPasswordByUsername(username);
-  
-    if (storedPassword !== null) {
-      console.log('User found!!');
-  
-      if (storedPassword === password) {
-        console.log('Correct password! :D');
+  const username = req.body.username;
+  const password = req.body.password;
+  const storedPassword = getPasswordByUsername(username);
 
-        // @ts-ignore
-        req.session.loggedin = true;
-        // @ts-ignore
-        req.session.username = username;
-        res.redirect('/');
+  if (storedPassword === null) {
+    return res.status(401).send('User not found.');
+  }
 
-      } else {
-        console.log('WRONG password!! >:(');
-        res.redirect('/login')
-      }
-    } else {
-      console.log('User not found :(');
-      res.redirect('/login')
-    }
+  if (storedPassword !== password) {
+    return res.status(401).send('Incorrect password.');
+  }
+
+  console.log(`User ${username} has logged in.`);
+
+  req.session.loggedin = true;
+  req.session.username = username;
+  res.redirect('/');
 });
 
-function getPasswordByUsername(usernameToFind: any) {
-    console.log("USERNAME TO FIND: " + usernameToFind);
-    console.log(userData);
-
-    try {
-        const user = userData.find(user => user.username === usernameToFind);
-        return user.password;
-    } catch (e) {
-        console.error("Error: " + e);
-        return null;
-    }
+function getPasswordByUsername(username_to_find: any) {
+  try {
+    const user = user_data.find(user => user.username === username_to_find);
+    return user.password;
+  } catch (e) {
+    console.error("Error: " + e);
+    return null;
+  }
 }
 
 export default router;

@@ -1,19 +1,28 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
+
+  <head>
     <title>Login</title>
     <link href="/public/css/style.css" rel="stylesheet">
-</head>
-<body>
-<div class="container">
-    <h2>Login</h2>
-    <form action="/login" method="POST">
+  </head>
+
+  <body>
+    <div class="container">
+      <h2>Login</h2>
+      <form action="/login" method="POST">
         <label for="username">Username:</label>
         <input id="username" name="username">
         <label for="password">Password:</label>
         <input id="password" name="password" type="password">
         <input type="submit" value="Submit">
-    </form>
-</div>
-</body>
+      </form>
+    </div>
+
+    <br>
+    <div id="message"></div>
+
+    <script src="/dist/scripts/login-script.js"></script>
+
+  </body>
+
 </html>

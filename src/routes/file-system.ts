@@ -2,7 +2,7 @@ import express from 'express';
 import archiver, { Archiver } from 'archiver';
 import fs from "fs";
 import path from "path";
-import { viewPath, getConfigData } from "../app";
+import { view_path, getConfigData } from "../app";
 
 const router = express.Router();
 
@@ -16,8 +16,7 @@ let rootPaths: any[] = [];
 
 router.get('/file-system', async (req, res) => {
   rootPaths = getConfigData().filesystems;
-  console.log("ROOT PATHS: " + JSON.stringify(rootPaths));
-  res.sendFile(path.join(viewPath, 'file-system.html'));
+  res.sendFile(path.join(view_path, 'file-system.html'));
 });
 
 router.get('/file-system/dir', async (req, res) => {
@@ -28,12 +27,10 @@ router.get('/file-system/dir', async (req, res) => {
     let page = parseInt(req.query.page as string) || 1;
     let limit = parseInt(req.query.limit as string) || 5;
     let filter = (req.query.filter as string) || "{}";
-    let sortBy = (req.query.sortBy as SortTypes) || "type";
-    let sortOrder = (req.query.sortOrder as SortOrder) || "dsc";
+    let sort_by = (req.query.sort_by as SortTypes) || "type";
+    let sort_order = (req.query.sort_order as SortOrder) || "dsc";
 
-    console.log(`fs_name: ${fs_name}, fs_root_path: ${fs_root_path}, path: ${path}, page: ${page}, limit: ${limit}, filter: ${filter}, sortBy: ${sortBy}, sortOrder: ${sortOrder}`);
-
-    const result = await processData(fs_name, fs_root_path, path, page, limit, filter, sortBy, sortOrder);
+    const result = await processData(fs_name, fs_root_path, path, page, limit, filter, sort_by, sort_order);
     res.status(200).json(result);
   } catch (err) {
     res.status(500).send('Internal Server Error');
@@ -41,29 +38,29 @@ router.get('/file-system/dir', async (req, res) => {
 });
 
 router.get('/file-system/download', (req, res) => {
-  const filePath = (req.query.filepath as string);
-  const fileSystemName = (req.query.fsname as string);
-  const newPath = filePath.replace(fileSystemName, getPathByName(fileSystemName));
+  const file_path = (req.query.filepath as string);
+  const fs_name = (req.query.fsname as string);
+  const new_path = file_path.replace(fs_name, getPathByName(fs_name));
 
-  if (!fs.existsSync(newPath)) {
+  if (!fs.existsSync(new_path)) {
     res.status(404).send("File not found");
     return;
   }
 
-  console.log(`Downloading file: ${newPath}`);
-  res.download(newPath);
+  console.log(`Downloading file: ${new_path}`);
+  res.download(new_path);
 });
 
 router.get('/file-system/zip', async (req, res) => {
-  const fileList = (req.query.files as string).split(',');
-  const fileSystemName = (req.query.fsname as string);
+  const file_list = (req.query.files as string).split(',');
+  const fs_name = (req.query.fsname as string);
 
   console.log("Downloading files as zip:");
-  console.log(fileList);
-  console.log(fileSystemName);
+  console.log(file_list);
+  console.log(fs_name);
 
   const zip = archiver('zip', { zlib: { level: 9 } });  // Set the compression level
-  await addStuffToZip(zip, fileList, fileSystemName);
+  await addStuffToZip(zip, file_list, fs_name);
   await zip.finalize();
   zip.pipe(res);
   res.attachment('files.zip');
@@ -92,29 +89,27 @@ function getPathByName(nameToFind: any) {
  * @param page
  * @param limit
  * @param filter
- * @param sortBy
- * @param sortOrder
+ * @param sort_by
+ * @param sort_order
  */
-async function processData(fs_name: string, fs_root_path: string, current_path: string, page: number, limit: number, filter: string, sortBy: SortTypes, sortOrder: SortOrder) {
+async function processData(fs_name: string, fs_root_path: string, current_path: string, page: number, limit: number, filter: string, sort_by: SortTypes, sort_order: SortOrder) {
 
   current_path = current_path.replace(fs_name, fs_root_path);
 
-  console.log(`fs_name: ${fs_name}, fs_root_path: ${fs_root_path}, TRUE CURRENT PATH: ${current_path}, page: ${page}, limit: ${limit}, filter: ${filter}, sortBy: ${sortBy}, sortOrder: ${sortOrder}`);
-
   let data = await getData(fs_name, fs_root_path, current_path);
   let filteredData = filterData(data, filter);
-  let sortedData = sortData(filteredData, sortBy, sortOrder);
-  let paginatedData = paginateData(sortedData, fs_name, fs_root_path, current_path, page, limit);
+  let sortedData = sortData(filteredData, sort_by, sort_order);
+  let paginated_data = paginateData(sortedData, fs_name, fs_root_path, current_path, page, limit);
 
   if (!(rootPaths.some(item => item.path === current_path))) {
-    return addParentDirectory(paginatedData, current_path, fs_name, fs_root_path);
+    return addParentDirectory(paginated_data, current_path, fs_name, fs_root_path);
   }
 
-  return paginatedData;
+  return paginated_data;
 }
 
 async function getData(fs_name: string, fs_root_path: string, directory: string): Promise<FileData[]> {
-  const fileData: FileData[] = [];
+  const file_data: FileData[] = [];
 
   console.log("Current Directory:", directory);
 
@@ -122,29 +117,29 @@ async function getData(fs_name: string, fs_root_path: string, directory: string)
     const items: string[] = await fs.promises.readdir(directory);
 
     // For every item in items, get the file data and add it to statPromises
-    const statPromises: Promise<FileData>[] = items.map(async itemName => {
-      const filePath = path.join(directory, itemName);
-      const stats = await fs.promises.stat(filePath);
+    const statPromises: Promise<FileData>[] = items.map(async item_name => {
+      const file_path = path.join(directory, item_name);
+      const stats = await fs.promises.stat(file_path);
       return {
-        name: itemName,
+        name: item_name,
         date: stats.mtime,
         date_readable: stats.mtime.toLocaleString(),
         type: stats.isFile() ? "File" : "Folder",
         size: stats.size,
         size_readable: formatFileSize(stats.size),
-        url: filePath.replaceAll('\\', '/').replace(fs_root_path, fs_name)
+        url: file_path.replaceAll('\\', '/').replace(fs_root_path, fs_name)
       };
     });
 
     // Push everything from statPromises to fileData
-    fileData.push(...await Promise.all(statPromises));
+    file_data.push(...await Promise.all(statPromises));
 
   } catch (err) {
     console.log("Error reading folder:", err);
     throw err;
   }
 
-  return fileData;
+  return file_data;
 }
 
 function formatFileSize(bytes: number): string {
@@ -172,12 +167,12 @@ function filterData(data: FileData[], filter: string): FileData[] {
   });
 }
 
-function sortData(data: FileData[], sortBy: keyof FileData, sortOrder: SortOrder): FileData[] {
+function sortData(data: FileData[], sort_by: keyof FileData, sort_order: SortOrder): FileData[] {
   return data.slice().sort((a, b) => {
-    const aValue = a[sortBy];
-    const bValue = b[sortBy];
+    const aValue = a[sort_by];
+    const bValue = b[sort_by];
 
-    if (sortOrder === 'asc') {
+    if (sort_order === 'asc') {
       if (aValue < bValue) return -1;
       if (aValue > bValue) return 1;
       return 0;
@@ -190,24 +185,24 @@ function sortData(data: FileData[], sortBy: keyof FileData, sortOrder: SortOrder
 }
 
 function paginateData(data: FileData[], fs_name: string, fs_root_path: string, path: string, page: number, limit: number): PaginatedResults {
-  const startIndex = (page - 1) * limit;
-  const endIndex = startIndex + limit;
+  const start_index = (page - 1) * limit;
+  const end_index = start_index + limit;
 
   const results: PaginatedResults = {
-    results: data.slice(startIndex, endIndex),
-    totalPages: Math.ceil(data.length / limit),
-    currentPath: path.replace(fs_root_path, fs_name),
-    homeName: fs_name
+    results: data.slice(start_index, end_index),
+    total_pages: Math.ceil(data.length / limit),
+    current_path: path.replace(fs_root_path, fs_name),
+    home_name: fs_name
   };
 
-  if (endIndex < data.length) {
+  if (end_index < data.length) {
     results.next = {
       page: page + 1,
       limit: limit,
     };
   }
 
-  if (startIndex > 0) {
+  if (start_index > 0) {
     results.prev = {
       page: page - 1,
       limit: limit,
@@ -217,11 +212,11 @@ function paginateData(data: FileData[], fs_name: string, fs_root_path: string, p
   return results;
 }
 
-function addParentDirectory(paginatedData: PaginatedResults, path: string, fs_name: string, fs_root_path: string): PaginatedResults {
+function addParentDirectory(paginated_data: PaginatedResults, path: string, fs_name: string, fs_root_path: string): PaginatedResults {
 
   // Remove the last directory
-  const pathParts = path.split('/');
-  const newPath = pathParts.slice(0, -1).join('/');
+  const path_parts = path.split('/');
+  const new_path = path_parts.slice(0, -1).join('/');
 
   let parentDir: FileData = {
     name: "..",
@@ -230,29 +225,29 @@ function addParentDirectory(paginatedData: PaginatedResults, path: string, fs_na
     type: "Folder",
     size: 0,
     size_readable: "",
-    url: newPath.replace(fs_root_path, fs_name)
+    url: new_path.replace(fs_root_path, fs_name)
   };
 
-  paginatedData.results.unshift(parentDir);
-  return paginatedData;
+  paginated_data.results.unshift(parentDir);
+  return paginated_data;
 }
 
-async function addStuffToZip(zip: Archiver, listOfItems: string[], fileSystemName: string) {
-  for (let item of listOfItems) {
-    let itemName = path.basename(item);
-    let itemPath = item.replace(fileSystemName, getPathByName(fileSystemName));
+async function addStuffToZip(zip: Archiver, list_of_items: string[], fs_name: string) {
+  for (let item of list_of_items) {
+    let item_name = path.basename(item);
+    let itemPath = item.replace(fs_name, getPathByName(fs_name));
 
     try {
       const stats = await fs.promises.stat(itemPath);
 
       if (stats.isFile()) {
-        console.log(`Adding file ${itemName} to archive.`);
-        zip.append(fs.createReadStream(itemPath), { name: itemName });
+        console.log(`Adding file ${item_name} to archive.`);
+        zip.append(fs.createReadStream(itemPath), { name: item_name });
       } else if (stats.isDirectory()) {
-        console.log(`Adding folder ${itemName} to archive.`);
-        zip.directory(itemPath, itemName);
+        console.log(`Adding folder ${item_name} to archive.`);
+        zip.directory(itemPath, item_name);
       } else {
-        console.error(`Error: Path is neither a file nor a directory: ${itemName}`);
+        console.error(`Error: Path is neither a file nor a directory: ${item_name}`);
       }
     } catch (err) {
       console.error('Error:', err);
@@ -288,9 +283,9 @@ type SortTypes = 'name' | 'date' | 'type' | 'size';
 
 type PaginatedResults = {
   results: FileData[];
-  totalPages: number;
-  currentPath: string;
-  homeName: string;
+  total_pages: number;
+  current_path: string;
+  home_name: string;
   next?: {
     page: number;
     limit: number;

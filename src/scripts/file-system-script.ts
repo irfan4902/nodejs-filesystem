@@ -1,4 +1,5 @@
-const fileSystemURL: string = window.location.origin + '/file-system';
+// import { view_path } from "../app";
+const file_system_url: string = window.location.origin + '/file-system';
 
 let home_name: string = '';
 let current_path: string = '';
@@ -24,10 +25,9 @@ window.addEventListener('load', async () => {
 async function fetchData() {
   try {
     const url = `/dir?fsname=${home_name}&path=${current_path}&page=${page}&limit=${limit_input.value}&filter=${filter}&sort_by=${sort_by}&sort_order=${sort_order}`;
-    const response = await fetch(fileSystemURL + url);
+    const response = await fetch(file_system_url + url);
     const data = await response.json();
 
-    // console.table(data.results);
     updateUI(data);
   } catch (error) {
     console.error("Error fetching or processing data:", error);
@@ -71,7 +71,7 @@ function sortTable(criteria: string) {
     sort_order = 'asc';
   }
 
-  arrow_image.src = sort_order === 'asc' ? "/public/img/expand_less.png" : "/public/img/expand_more.png";
+  arrow_image.src = sort_order === 'asc' ? "../public/img/expand_less.png" : "../public/img/expand_more.png";
 
   fetchData();
 }
@@ -121,7 +121,7 @@ function updateTable(data: any) {
 
     if (item.type === "File") {
       cell5.innerHTML = item.size_readable;
-      cell6.innerHTML = `<button onclick="window.location.href='${fileSystemURL}/download?fsname=${home_name}&filepath=${item.url}'">Download</button>`;
+      cell6.innerHTML = `<button onclick="window.location.href='${file_system_url}/download?fsname=${home_name}&filepath=${item.url}'">Download</button>`;
     }
   }
 
@@ -144,7 +144,7 @@ function updatePagination(data: PaginatedResults) {
   for (let button of prevButtons as any) {
     button.disabled = !data.hasOwnProperty("prev");
   }
-  pageText.innerHTML = `Page: ${page}/${data.totalPages}`;
+  pageText.innerHTML = `Page: ${page}/${data.total_pages}`;
 }
 
 function updateBreadcrumb() {
@@ -201,7 +201,7 @@ function zipItems() {
     }
   }
 
-  window.location.href = `${fileSystemURL}/zip?fsname=${home_name}&files=${selectedItems.join()}`;
+  window.location.href = `${file_system_url}/zip?fsname=${home_name}&files=${selectedItems.join()}`;
 }
 
 function convertDateFormat(inputDate: string) {
@@ -272,7 +272,7 @@ type FileData = {
 
 type PaginatedResults = {
   results: FileData[];
-  totalPages: number;
+  total_pages: number;
   current_path: string;
   home_name: string;
   next?: {

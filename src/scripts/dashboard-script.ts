@@ -5,10 +5,10 @@ window.addEventListener('load', async () => {
 async function getFileSystems() {
   try {
     const response = await fetch('/get-filesystems');
-    const data = await response.json();
+    const filesystem_names = await response.json();
 
-    for (const f of data) {
-      addBox(f);
+    for (const name of filesystem_names) {
+      addBox(name);
     }
   } catch (error) {
     console.error("Error fetching or processing data:", error);

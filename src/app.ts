@@ -1,6 +1,7 @@
 import path from "path";
 import fs from "fs/promises";
 import express from 'express';
+import { Request, Response, NextFunction } from 'express';
 import session from 'express-session';
 
 // Import all the routes
@@ -12,7 +13,7 @@ import logout from './routes/logout';
 
 const app = express();
 const PORT = process.env.PORT || 4000;
-export const viewPath = path.join(__dirname, '../views');
+export const view_path = path.join(__dirname, '../views');
 
 // Set up session
 app.use(session({
@@ -21,13 +22,20 @@ app.use(session({
   saveUninitialized: true
 }));
 
-// @ts-ignore
-function checkLoggedIn(req, res, next) {
+// Declare your custom session properties
+declare module 'express-session' {
+  interface Session {
+    loggedin: boolean;
+    username: string;
+  }
+}
+
+
+function checkLoggedIn(req: Request, res: Response, next: NextFunction) {
   if (!req.session.loggedin) {
-    console.log('nooo not logged in');
+    console.log('Not logged in.');
     res.redirect('/login');
   } else {
-    console.log('hii already logged in');
     next();
   }
 }
