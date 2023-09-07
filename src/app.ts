@@ -30,7 +30,6 @@ declare module 'express-session' {
   }
 }
 
-
 function checkLoggedIn(req: Request, res: Response, next: NextFunction) {
   if (!req.session.loggedin) {
     console.log('Not logged in.');

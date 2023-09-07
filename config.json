@@ -16,15 +16,26 @@
   "users": [
     {
       "username": "creditadmin",
-      "password": "CreditAdminRock"
+      "password": "CreditAdminRock",
+      "permissions": [
+        "OBR File System"
+      ]
     },
     {
       "username": "marketrisk",
-      "password": "MarketRiskRock"
+      "password": "MarketRiskRock",
+      "permissions": [
+        "SDIS File System"
+      ]
     },
     {
       "username": "admin",
-      "password": "1234"
+      "password": "1234",
+      "permissions": [
+        "SDIS File System",
+        "OBR File System",
+        "DQR File System"
+      ]
     }
   ],
   "port": 4000,

@@ -6,7 +6,7 @@ import { view_path, getConfigData } from "../app";
 
 const router = express.Router();
 
-let rootPaths: any[] = [];
+let root_paths: any[] = [];
 
 
 //
@@ -15,7 +15,7 @@ let rootPaths: any[] = [];
 
 
 router.get('/file-system', async (req, res) => {
-  rootPaths = getConfigData().filesystems;
+  root_paths = getConfigData().filesystems;
   res.sendFile(path.join(view_path, 'file-system.html'));
 });
 
@@ -71,8 +71,8 @@ router.get('/file-system/zip', async (req, res) => {
 //  Functions
 //
 
-function getPathByName(nameToFind: any) {
-  const item = rootPaths.find(item => item.name === nameToFind);
+function getPathByName(name_to_find: any) {
+  const item = root_paths.find(item => item.name === name_to_find);
 
   if (item) {
     return item.path;
@@ -101,7 +101,7 @@ async function processData(fs_name: string, fs_root_path: string, current_path: 
   let sortedData = sortData(filteredData, sort_by, sort_order);
   let paginated_data = paginateData(sortedData, fs_name, fs_root_path, current_path, page, limit);
 
-  if (!(rootPaths.some(item => item.path === current_path))) {
+  if (!(root_paths.some(item => item.path === current_path))) {
     return addParentDirectory(paginated_data, current_path, fs_name, fs_root_path);
   }
 
