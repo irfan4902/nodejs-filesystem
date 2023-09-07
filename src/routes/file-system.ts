@@ -63,7 +63,7 @@ router.get('/file-system/zip', async (req, res) => {
   await addStuffToZip(zip, file_list, fs_name);
   await zip.finalize();
   zip.pipe(res);
-  res.attachment('files.zip');
+  res.attachment(`${fs_name}.zip`);
 });
 
 
