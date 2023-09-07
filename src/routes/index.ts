@@ -14,7 +14,6 @@ router.get('/', (req, res) => {
 router.get('/get-filesystems', async (req, res) => {
   const username = req.session.username;
   const user_permissions = getPermissionsByUsername(username);
-  console.log(user_permissions);
 
   let fs_names: string[] = [];
 
